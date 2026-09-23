@@ -458,7 +458,6 @@ func (s *Server) handleAppList(w http.ResponseWriter, r *http.Request) {
 		{Value: model.StatusAccepted, Label: "Asil"},
 		{Value: model.StatusReserve, Label: "Yedek"},
 		{Value: model.StatusRejected, Label: "Değerlendirme dışı"},
-		{Value: model.StatusDraft, Label: "Taslak (tamamlanmamış)"},
 	}
 	s.render(w, r, "admin_basvurular", p)
 }

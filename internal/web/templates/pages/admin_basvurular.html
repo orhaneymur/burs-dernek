@@ -17,7 +17,7 @@
   <div class="field">
     <label for="durum">Durum</label>
     <select id="durum" name="durum">
-      <option value="">Taslak hariç tümü</option>
+      <option value="">Tümü</option>
       {{$f := .Data.Filter}}
       {{range .Data.StatusOptions}}<option value="{{.Value}}"{{if eq (index $f "durum") .Value}} selected{{end}}>{{.Label}}</option>{{end}}
     </select>

@@ -1,0 +1,271 @@
+{{define "content"}}
+{{$a := .Data.App}}
+{{$p := .Data.Period}}
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-text">
+      <p class="eyebrow">{{$p.Name}}</p>
+      <h1>Burs Başvuru Formu</h1>
+      <p class="lead">Tek sayfada doldurun, transkriptinizi ekleyin ve gönderin. Tüm başvurular aynı ölçütlerle değerlendirilir.</p>
+      {{if $p.Description}}<p class="muted">{{$p.Description}}</p>{{end}}
+    </div>
+    <div class="hero-facts">
+      <div><span class="fact-label">Son başvuru</span><span class="fact-value">{{tarih $p.ClosesAt}}</span></div>
+      <div><span class="fact-label">Kontenjan</span><span class="fact-value">{{$p.Quota}} asil{{if $p.ReserveQuota}} · {{$p.ReserveQuota}} yedek{{end}}</span></div>
+      <div><span class="fact-label">İstenen belge</span><span class="fact-value">Yalnızca transkript</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  {{if .Data.HataVar}}
+  <div class="flash flash-hata" role="alert">
+    <strong>Form gönderilemedi.</strong> Aşağıda kırmızı ile işaretlenen alanları düzeltip tekrar gönderin.
+  </div>
+  {{end}}
+
+  <form method="post" action="/basvuru/{{$p.Slug}}" enctype="multipart/form-data" class="form-layout" novalidate>
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="hp" aria-hidden="true"><label>Web siteniz<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+    <aside class="form-nav" aria-label="Bölümler">
+      <ol>
+        <li><a href="#bolum-kimlik">Kimlik ve iletişim</a></li>
+        <li><a href="#bolum-egitim">Eğitim</a></li>
+        <li><a href="#bolum-ekonomi">Ekonomik durum</a></li>
+        <li><a href="#bolum-aile">Aile</a></li>
+        <li><a href="#bolum-diger">Burs ve sosyal</a></li>
+        <li><a href="#bolum-belge">Transkript</a></li>
+        <li><a href="#bolum-onay">Onay ve gönderim</a></li>
+      </ol>
+      <p class="muted small">Yıldızlı (*) alanlar zorunludur.</p>
+    </aside>
+
+    <div class="form-body">
+
+      <!-- 1 -->
+      <section class="card" id="bolum-kimlik">
+        <h2><span class="step-no">1</span> Kimlik ve iletişim</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="national_id">T.C. Kimlik Numarası *</label>
+            <input id="national_id" name="national_id" inputmode="numeric" maxlength="11" autocomplete="off" value="{{$a.NationalID}}">
+            {{with index $.Errors "national_id"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="birth_date">Doğum Tarihi *</label>
+            <input id="birth_date" name="birth_date" type="date" value="{{tarihInput $a.BirthDate}}">
+            {{with index $.Errors "birth_date"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="first_name">Ad *</label>
+            <input id="first_name" name="first_name" autocomplete="given-name" value="{{$a.FirstName}}">
+            {{with index $.Errors "first_name"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="last_name">Soyad *</label>
+            <input id="last_name" name="last_name" autocomplete="family-name" value="{{$a.LastName}}">
+            {{with index $.Errors "last_name"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="phone">Cep Telefonu *</label>
+            <input id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="5XX XXX XX XX" value="{{$a.Phone}}">
+            {{with index $.Errors "phone"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="email">E-posta *</label>
+            <input id="email" name="email" type="email" autocomplete="email" value="{{$a.Email}}">
+            {{with index $.Errors "email"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="city">İl *</label>
+            <input id="city" name="city" value="{{$a.City}}">
+            {{with index $.Errors "city"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="district">İlçe</label>
+            <input id="district" name="district" value="{{$a.District}}">
+          </div>
+          <div class="field">
+            <label for="gender">Cinsiyet</label>
+            <select id="gender" name="gender">
+              <option value="">Belirtmek istemiyorum</option>
+              {{range .Data.Genders}}<option value="{{.Value}}"{{if eq $a.Gender .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="card" id="bolum-egitim">
+        <h2><span class="step-no">2</span> Eğitim</h2>
+        <div class="grid">
+          <div class="field col-2">
+            <label for="university">Üniversite *</label>
+            <input id="university" name="university" value="{{$a.University}}">
+            {{with index $.Errors "university"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field col-2">
+            <label for="department">Bölüm *</label>
+            <input id="department" name="department" value="{{$a.Department}}">
+            {{with index $.Errors "department"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="class_year">Sınıf *</label>
+            <select id="class_year" name="class_year">
+              <option value="">Seçiniz</option>
+              {{range .Data.Classes}}<option value="{{.Value}}"{{if eq $a.ClassYear .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+            {{with index $.Errors "class_year"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="gpa">Not Ortalaması (GANO) *</label>
+            <div class="input-pair">
+              <input id="gpa" name="gpa" inputmode="decimal" placeholder="3,10" value="{{if $a.GPA}}{{printf "%.2f" $a.GPA}}{{end}}">
+              <select name="gpa_scale" aria-label="Not sistemi">
+                <option value="4"{{if eq $a.GPAScale "4"}} selected{{end}}>4'lük</option>
+                <option value="100"{{if eq $a.GPAScale "100"}} selected{{end}}>100'lük</option>
+              </select>
+            </div>
+            <p class="hint">Hazırlık veya 1. sınıftaysanız boş bırakabilirsiniz.</p>
+            {{with index $.Errors "gpa"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="card" id="bolum-ekonomi">
+        <h2><span class="step-no">3</span> Ekonomik durum</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="household_income">Hanenin Aylık Net Geliri (TL) *</label>
+            <input id="household_income" name="household_income" inputmode="numeric" value="{{if $a.HouseholdIncome}}{{$a.HouseholdIncome}}{{end}}">
+            <p class="hint">Hanedeki tüm gelirlerin toplamı. Gelir yoksa 0 yazın.</p>
+          </div>
+          <div class="field">
+            <label for="household_size">Hanede Yaşayan Kişi Sayısı *</label>
+            <input id="household_size" name="household_size" inputmode="numeric" value="{{if $a.HouseholdSize}}{{$a.HouseholdSize}}{{end}}">
+            {{with index $.Errors "household_size"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field col-2">
+            <label for="housing_type">Öğrenim Sırasında Nerede Kalıyorsunuz? *</label>
+            <select id="housing_type" name="housing_type">
+              <option value="">Seçiniz</option>
+              {{range .Data.Housing}}<option value="{{.Value}}"{{if eq $a.HousingType .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+            {{with index $.Errors "housing_type"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="father_status">Baba Çalışma Durumu</label>
+            <select id="father_status" name="father_status">
+              <option value="">Seçiniz</option>
+              {{range .Data.ParentStatus}}<option value="{{.Value}}"{{if eq $a.FatherStatus .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+          </div>
+          <div class="field">
+            <label for="mother_status">Anne Çalışma Durumu</label>
+            <select id="mother_status" name="mother_status">
+              <option value="">Seçiniz</option>
+              {{range .Data.ParentStatus}}<option value="{{.Value}}"{{if eq $a.MotherStatus .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+          </div>
+        </div>
+        <div class="check-row">
+          <label class="check"><input type="checkbox" name="owns_property" value="on"{{if $a.OwnsProperty}} checked{{end}}><span>Ailemin üzerine kayıtlı ev, arsa veya iş yeri var</span></label>
+          <label class="check"><input type="checkbox" name="owns_vehicle" value="on"{{if $a.OwnsVehicle}} checked{{end}}><span>Ailemin üzerine kayıtlı araç var</span></label>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="card" id="bolum-aile">
+        <h2><span class="step-no">4</span> Aile</h2>
+        <div class="grid">
+          <div class="field col-2">
+            <label for="parents_status">Anne ve Baba Durumu *</label>
+            <select id="parents_status" name="parents_status">
+              <option value="">Seçiniz</option>
+              {{range .Data.ParentsStatus}}<option value="{{.Value}}"{{if eq $a.ParentsStatus .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+            </select>
+            {{with index $.Errors "parents_status"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="sibling_count">Kardeş Sayısı</label>
+            <input id="sibling_count" name="sibling_count" inputmode="numeric" value="{{$a.SiblingCount}}">
+          </div>
+          <div class="field">
+            <label for="student_sibling_count">Öğrenci Olan Kardeş Sayısı</label>
+            <input id="student_sibling_count" name="student_sibling_count" inputmode="numeric" value="{{$a.StudentSiblingCount}}">
+            {{with index $.Errors "student_sibling_count"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+        </div>
+        <div class="check-row">
+          <label class="check"><input type="checkbox" name="disability" value="on"{{if $a.Disability}} checked{{end}}><span>Kendimde veya hanemde engelli birey var</span></label>
+          <label class="check"><input type="checkbox" name="martyr_relative" value="on"{{if $a.MartyrRelative}} checked{{end}}><span>Şehit veya gazi yakınıyım</span></label>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="card" id="bolum-diger">
+        <h2><span class="step-no">5</span> Burs ve sosyal katılım</h2>
+        <label class="check"><input type="checkbox" id="other_scholarship" name="other_scholarship" value="on"{{if $a.OtherScholarship}} checked{{end}}><span>Şu anda başka bir kurumdan burs/kredi alıyorum</span></label>
+        <div class="grid">
+          <div class="field">
+            <label for="other_scholarship_name">Bursu Veren Kurum</label>
+            <input id="other_scholarship_name" name="other_scholarship_name" value="{{$a.OtherScholarshipName}}">
+            {{with index $.Errors "other_scholarship_name"}}<p class="field-error">{{.}}</p>{{end}}
+          </div>
+          <div class="field">
+            <label for="other_scholarship_amount">Aylık Tutar (TL)</label>
+            <input id="other_scholarship_amount" name="other_scholarship_amount" inputmode="numeric" value="{{if $a.OtherScholarshipAmount}}{{$a.OtherScholarshipAmount}}{{end}}">
+          </div>
+          <div class="field col-2">
+            <label for="sports_club">Üyesi Olduğunuz Kulüp / Dernek</label>
+            <input id="sports_club" name="sports_club" value="{{$a.SportsClub}}">
+          </div>
+          <div class="field col-2">
+            <label for="volunteer_text">Gönüllü Çalışmalarınız</label>
+            <textarea id="volunteer_text" name="volunteer_text" rows="3" maxlength="1200" placeholder="Katıldığınız gönüllülük, spor veya kültür çalışmaları (isteğe bağlı)">{{$a.VolunteerText}}</textarea>
+          </div>
+          <div class="field col-2">
+            <label for="motivation_text">Neden burs almak istiyorsunuz?</label>
+            <textarea id="motivation_text" name="motivation_text" rows="4" maxlength="2000" placeholder="Kısaca anlatın (isteğe bağlı, komisyon değerlendirmesinde dikkate alınır)">{{$a.MotivationText}}</textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="card" id="bolum-belge">
+        <h2><span class="step-no">6</span> Transkript</h2>
+        <p class="muted">Tek istenen belge budur. E-Devlet'ten veya üniversitenizin öğrenci bilgi sisteminden alabilirsiniz.</p>
+        <div class="field">
+          <label for="transkript">Transkript dosyası {{if .Data.RequireTranscript}}*{{end}}</label>
+          <input id="transkript" name="transkript" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+          <p class="hint">PDF, JPG veya PNG · en fazla {{.Data.MaxUploadMB}} MB · Hazırlık ve 1. sınıf öğrencilerinden istenmez.</p>
+          {{with index $.Errors "transkript"}}<p class="field-error">{{.}}</p>{{end}}
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section class="card" id="bolum-onay">
+        <h2><span class="step-no">7</span> Onay ve gönderim</h2>
+        <details class="kvkk-details">
+          <summary>KVKK Aydınlatma Metni'ni oku</summary>
+          <div class="kvkk-box">{{range satirlar .Data.KVKK}}<p>{{.}}</p>{{end}}</div>
+        </details>
+
+        <label class="check"><input type="checkbox" name="kvkk" value="on"><span>Aydınlatma metnini okudum; kişisel verilerimin ve özel nitelikli verilerimin burs değerlendirmesi amacıyla işlenmesine açık rıza veriyorum. *</span></label>
+        {{with index $.Errors "kvkk"}}<p class="field-error">{{.}}</p>{{end}}
+
+        <label class="check"><input type="checkbox" name="beyan" value="on"><span>Verdiğim bilgilerin doğru olduğunu, gerçeğe aykırı beyan hâlinde başvurumun geçersiz sayılacağını kabul ediyorum. *</span></label>
+        {{with index $.Errors "beyan"}}<p class="field-error">{{.}}</p>{{end}}
+
+        <div class="submit-row">
+          <button class="btn btn-primary btn-lg" type="submit">Başvurumu gönder</button>
+          <p class="muted small">Gönderdikten sonra başvurunuzda değişiklik yapılamaz. Size bir başvuru numarası verilecek.</p>
+        </div>
+      </section>
+    </div>
+  </form>
+</div>
+{{end}}

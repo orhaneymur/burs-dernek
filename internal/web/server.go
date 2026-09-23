@@ -86,20 +86,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /saglik", s.handleHealth)
 	mux.HandleFunc("GET /kvkk", s.handleKVKK)
 
-	// --- Basvuru akisi
-	mux.HandleFunc("GET /basvuru/{slug}", s.handleApplyIntro)
-	mux.HandleFunc("POST /basvuru/{slug}", s.handleApplyStart)
-	mux.HandleFunc("GET /basvuru/adim/{n}", s.handleStepGet)
-	mux.HandleFunc("POST /basvuru/adim/{n}", s.handleStepPost)
-	mux.HandleFunc("POST /basvuru/belge", s.handleUpload)
-	mux.HandleFunc("POST /basvuru/belge/sil", s.handleUploadDelete)
-	mux.HandleFunc("POST /basvuru/tamamla", s.handleSubmit)
-	mux.HandleFunc("GET /basvuru/tamamlandi", s.handleSubmitted)
-	mux.HandleFunc("GET /devam", s.handleResumeGet)
-	mux.HandleFunc("POST /devam", s.handleResumePost)
-	mux.HandleFunc("GET /devam/{token}", s.handleResumeToken)
-	mux.HandleFunc("GET /sorgula", s.handleStatusGet)
-	mux.HandleFunc("POST /sorgula", s.handleStatusPost)
+	// --- Basvuru akisi (tek sayfa)
+	mux.HandleFunc("GET /basvuru/{slug}", s.handleApplyForm)
+	mux.HandleFunc("POST /basvuru/{slug}", s.handleApplySubmit)
+	mux.HandleFunc("GET /basvurunuz-alindi", s.handleSubmitted)
 
 	// --- Yonetim
 	mux.HandleFunc("GET /yonetim/giris", s.handleLoginGet)
@@ -168,7 +158,7 @@ func (s *Server) newPage(w http.ResponseWriter, r *http.Request, title string) *
 		CSRF:    s.csrfToken(w, r),
 		BaseURL: s.cfg.BaseURL,
 		Year:    time.Now().Year(),
-		OrgName: s.st.Setting(ctx, "org_name", "Lüleburgaz İlçe Federasyonu"),
+		OrgName: s.st.Setting(ctx, "org_name", "LAFED Federasyonu"),
 		Contact: s.st.Setting(ctx, "contact", "burs@lafed.org.tr"),
 		Data:     map[string]any{},
 		Errors:   map[string]string{},

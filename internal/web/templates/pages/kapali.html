@@ -1,0 +1,34 @@
+{{define "content"}}
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-text">
+      <h1>Burs Başvurusu</h1>
+      {{with .Data.Period}}
+        {{if eq .Status "ilan"}}
+          <p class="lead">{{.Name}} dönemi tamamlandı ve sonuçlar ilan edildi.</p>
+          {{if .ResultNote}}<p class="muted">{{.ResultNote}}</p>{{end}}
+        {{else}}
+          <p class="lead">{{.Name}} dönemine başvurular şu anda kapalı.</p>
+          <p class="muted">Başvuru tarihleri: {{tarih .OpensAt}} – {{tarih .ClosesAt}}</p>
+        {{end}}
+      {{else}}
+        <p class="lead">Şu anda açık bir başvuru dönemi bulunmuyor.</p>
+        <p class="muted">Yeni dönem açıldığında başvuru formu bu sayfada yayımlanacaktır.</p>
+      {{end}}
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="card">
+    <h2>Başvuru nasıl yapılır?</h2>
+    <ol class="steps">
+      <li><strong>Tek sayfalık formu doldurun.</strong> Kimlik, eğitim, ekonomik durum ve aile bilgileriniz istenir.</li>
+      <li><strong>Transkriptinizi ekleyin.</strong> İstenen tek belge budur.</li>
+      <li><strong>Gönderin.</strong> Size bir başvuru numarası verilir.</li>
+      <li><strong>Değerlendirme.</strong> Başvurunuz ölçütlere göre puanlanır ve burs komisyonu tarafından incelenir.</li>
+      <li><strong>Sonuç.</strong> Sonuçlar federasyon tarafından sizinle paylaşılır.</li>
+    </ol>
+  </section>
+</div>
+{{end}}

@@ -221,14 +221,18 @@ type DocumentKind struct {
 }
 
 // DocumentKinds basvuruda istenen belgeleri tanimlar.
+// Ogrenciyi yormamak icin tek belge istenir: transkript.
 var DocumentKinds = []DocumentKind{
-	{"ogrenci_belgesi", "Öğrenci Belgesi", "E-Devlet'ten alınabilir, bu döneme ait olmalı", true},
-	{"transkript", "Transkript", "Hazırlık/1. sınıf öğrencisi değilseniz zorunlu", false},
-	{"gelir_belgesi", "Gelir Durumu Belgesi", "Anne/baba maaş bordrosu, SGK hizmet dökümü veya gelir yok yazısı", true},
-	{"ikametgah", "Yerleşim Yeri Belgesi", "E-Devlet'ten alınan ikametgâh belgesi", true},
-	{"nufus_kayit", "Vukuatlı Nüfus Kayıt Örneği", "Aile bireylerini gösteren belge", false},
-	{"diger", "Diğer Belge", "Engelli sağlık raporu, şehit/gazi yakınlık belgesi vb.", false},
+	{
+		Key:      "transkript",
+		Label:    "Transkript (not durum belgesi)",
+		Hint:     "E-Devlet'ten veya üniversitenizin öğrenci bilgi sisteminden alabilirsiniz. PDF, JPG veya PNG.",
+		Required: true,
+	},
 }
+
+// TranscriptKind tek belge turunun anahtari.
+const TranscriptKind = "transkript"
 
 func DocumentKindLabel(key string) string {
 	for _, k := range DocumentKinds {

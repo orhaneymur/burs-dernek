@@ -21,7 +21,7 @@ Adres: **https://burs.lafed.org.tr/yonetim/giris**
    - *Taslak* — bağlantı çalışmaz, hazırlık aşaması
    - *Başvurulara açık* — öğrenciler başvurabilir
    - *Başvurular kapalı* — yeni başvuru alınmaz, değerlendirme sürer
-   - *Sonuçlar ilan edildi* — öğrenciler takip koduyla sonucu görür
+   - *Sonuçlar ilan edildi* — form kapanır, dönem tamamlanmış sayılır
 4. Kaydedin. Panelde görünen başvuru bağlantısını duyurularınızda paylaşın.
 
 > Dönem durumunu **Dönemler** listesindeki açılır menüden tek tıkla değiştirebilirsiniz.
@@ -62,7 +62,7 @@ Rol olarak **Komisyon üyesi** seçin. Komisyon üyeleri:
    - **Puan durumu:** otomatik puan, komisyon ortalaması, nihai puan
    - **Kriter kırılımı:** her ölçütten kaç puan aldığı ve nedeni
    - **Dikkat edilecekler:** düşük GANO, mülkiyet beyanı, sıfır gelir beyanı gibi uyarılar
-   - **Belgeler:** tıklayınca yeni sekmede açılır (her görüntüleme kayda geçer)
+   - **Transkript:** tıklayınca yeni sekmede açılır (her görüntüleme kayda geçer)
 3. **Komisyon Değerlendirmeniz** kutusuna 0-100 arası puanınızı ve notunuzu yazıp kaydedin.
 4. Her üye kendi puanını girer; sistem ortalamayı alır ve nihai puanı günceller.
 
@@ -79,10 +79,10 @@ Rol olarak **Komisyon üyesi** seçin. Komisyon üyeleri:
    bu başvurular listeye alınmaz
 5. **Kontenjanı uygula** — asil ve yedek listeleri işaretlenir
 6. Listeyi son bir kez kontrol edin, gerekirse elle düzeltin
-7. **Dönemler** → dönem durumunu **Sonuçlar ilan edildi** yapın
+7. **Dönemler** → dönem durumunu **Sonuçlar ilan edildi** yapın (böylece form kapanır)
 
-Artık öğrenciler `https://burs.lafed.org.tr/sorgula` adresinden takip kodu ve doğum tarihiyle
-sonuçlarını görebilir.
+Sonuçları öğrencilere federasyon kanalıyla (telefon, e-posta, duyuru) bildirin; sistemde öğrencinin
+sonuç sorgulayacağı bir ekran yoktur. Asil/yedek listesini **Sıralama** sayfasından veya CSV'den alabilirsiniz.
 
 ---
 
@@ -103,12 +103,13 @@ Noktalı virgül*.
 
 | Soru | Cevap |
 |---|---|
-| "Formu yarıda bıraktım, bilgilerim kayboldu mu?" | Hayır. Ana sayfadaki **Başvuruma devam et** bağlantısından T.C. kimlik numarası ve doğum tarihiyle kaldığı yerden devam eder. |
-| "Takip kodumu kaybettim." | Başvurular sayfasından adıyla arayıp kodu kendisine iletebilirsiniz. |
-| "Belgeyi yükleyemiyorum." | Dosya PDF, JPG veya PNG olmalı ve 8 MB'ı geçmemeli. Telefonla çekilen fotoğraflar genelde uygundur. |
-| "Hazırlık sınıfındayım, not ortalamam yok." | GANO alanını boş bırakabilir; sistem taban puan uygular. |
-| "Başvurumu göndermiştim, düzeltebilir miyim?" | Gönderilen başvuru kilitlenir. Gerekirse yönetici başvuruyu silip öğrenciden yeniden başvurmasını isteyebilir. |
-| "Sonuçlar ne zaman açıklanacak?" | Dönem *Sonuçlar ilan edildi* durumuna alındığında sorgulama sayfasından görünür. |
+| "Formu doldururken sayfayı kapattım." | Form tek sayfadır ve ara kayıt yapılmaz; baştan doldurması gerekir. Doldurması ortalama 5 dakika sürer. |
+| "Hangi belgeleri hazırlamalıyım?" | Yalnızca transkript. Başka belge istenmez. |
+| "Hazırlık sınıfındayım, transkriptim yok." | Hazırlık ve 1. sınıf öğrencilerinden transkript ve not ortalaması istenmez. |
+| "Transkriptimi yükleyemiyorum." | Dosya PDF, JPG veya PNG olmalı ve 8 MB'ı geçmemeli. Telefonla çekilen fotoğraflar genelde uygundur. |
+| "Başvurumu gönderdim, düzeltebilir miyim?" | Gönderilen başvuru kilitlenir. Gerekirse yönetici başvuruyu silip öğrenciden yeniden başvurmasını isteyebilir. |
+| "Aynı kişi iki kez başvurabilir mi?" | Hayır; aynı dönemde aynı T.C. kimlik numarasıyla ikinci başvuru sistem tarafından engellenir. |
+| "Sonucumu nereden öğreneceğim?" | Sonuçlar federasyon tarafından öğrencilere bildirilir. Sistemde sorgulama ekranı yoktur. |
 
 ---
 

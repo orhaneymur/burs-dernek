@@ -1,13 +1,1 @@
-{{define "donem_kart"}}
-<div class="period-card">
-  <h2>{{.Name}}</h2>
-  {{if .Description}}<p>{{.Description}}</p>{{end}}
-  <dl class="period-meta">
-    <div><dt>Başvuru tarihleri</dt><dd>{{tarih .OpensAt}} – {{tarih .ClosesAt}}</dd></div>
-    <div><dt>Kontenjan</dt><dd>{{.Quota}} asil{{if .ReserveQuota}}, {{.ReserveQuota}} yedek{{end}}</dd></div>
-    <div><dt>Durum</dt><dd>{{.StatusLabel}}</dd></div>
-  </dl>
-</div>
-{{end}}
-
 {{define "durum_rozeti"}}<span class="badge badge-{{.}}">{{durumEtiketi .}}</span>{{end}}

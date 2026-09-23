@@ -1,8 +1,9 @@
 {{define "content"}}
-<section class="hero narrow">
-  <h1>KVKK Aydınlatma Metni</h1>
-</section>
-<section class="card">
-  <div class="kvkk-box open">{{range satirlar .Data.Text}}<p>{{.}}</p>{{end}}</div>
-</section>
+<div class="wrap narrow">
+  <section class="card">
+    <h1>KVKK Aydınlatma Metni</h1>
+    <div class="prose">{{range satirlar .Data.Text}}<p>{{.}}</p>{{end}}</div>
+    <p><a class="btn" href="/">← Başvuru formuna dön</a></p>
+  </section>
+</div>
 {{end}}

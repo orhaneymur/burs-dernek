@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
 <title>{{.Title}} · {{.OrgName}}</title>
 <link rel="stylesheet" href="/static/css/app.css">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
@@ -11,33 +12,36 @@
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
 
-<header class="site-header">
-  <div class="wrap header-inner">
+<header class="topbar">
+  <div class="wrap topbar-inner">
     <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true">B</span>
+      <span class="brand-mark" aria-hidden="true">L</span>
       <span class="brand-text">
-        <strong>Burs Başvuru Sistemi</strong>
-        <small>{{.OrgName}}</small>
+        <strong>{{.OrgName}}</strong>
+        <small>Burs Başvuru Sistemi</small>
       </span>
     </a>
-    <nav class="site-nav">
-      <a href="/"{{if eq .Active "home"}} class="active"{{end}}>Ana sayfa</a>
-      <a href="/sorgula"{{if eq .Active "sorgula"}} class="active"{{end}}>Başvuru sorgula</a>
+    <nav class="topnav">
+      <a href="/"{{if eq .Active "home"}} class="active"{{end}}>Başvuru</a>
       <a href="/kvkk"{{if eq .Active "kvkk"}} class="active"{{end}}>KVKK</a>
     </nav>
   </div>
 </header>
 
-<main id="icerik" class="wrap">
-  {{with .Flash}}<div class="flash flash-{{.Kind}}" role="status">{{.Text}}</div>{{end}}
+<main id="icerik">
+  {{with .Flash}}<div class="wrap"><div class="flash flash-{{.Kind}}" role="status">{{.Text}}</div></div>{{end}}
   {{template "content" .}}
 </main>
 
-<footer class="site-footer">
+<footer class="footer">
   <div class="wrap footer-inner">
-    <p>{{.OrgName}} · Burs Başvuru ve Değerlendirme Sistemi</p>
-    <p class="muted">İletişim: {{.Contact}} · <a href="/kvkk">Aydınlatma metni</a> · <a href="/yonetim/giris">Yönetim</a></p>
-    <p class="muted">© {{.Year}}</p>
+    <div>
+      <strong>{{.OrgName}}</strong>
+      <span class="muted">Burs Başvuru ve Değerlendirme Sistemi</span>
+    </div>
+    <div class="muted">
+      {{.Contact}} · <a href="/kvkk">Aydınlatma metni</a> · <a href="/yonetim/giris">Yönetim</a> · © {{.Year}}
+    </div>
   </div>
 </footer>
 <script src="/static/js/app.js" defer></script>

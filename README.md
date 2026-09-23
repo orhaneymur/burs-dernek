@@ -9,7 +9,7 @@ otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten ha
 |---|---|
 | Dil / çatı | Go 1.23, standart kütüphane (`net/http` + `html/template`) |
 | Veritabanı | MariaDB / MySQL |
-| Ön yüz | Sunucu taraflı HTML + tek CSS dosyası; JavaScript olmadan da tam çalışır |
+| Ön yüz | Sunucu taraflı HTML + tek CSS dosyası (açık/koyu tema); JavaScript olmadan da tam çalışır |
 | Docker imajı | **12,9 MB** (`scratch` tabanlı tek statik binary) |
 | Çalışma anı bellek | **~5 MB** (uygulama), ~85 MB (MariaDB) — canlı ölçüm |
 | Dış bağımlılık | Yalnızca MySQL sürücüsü ve `bcrypt` |
@@ -35,10 +35,11 @@ otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten ha
 
 **Öğrenci tarafı** — tek bir bağlantı (`/basvuru/2026-2027`) üzerinden:
 
-- 7 adımlık başvuru formu: kimlik, eğitim, ekonomik durum, aile, burs/sosyal, belgeler, özet
-- Her adım otomatik kaydedilir; öğrenci yarıda bırakıp **T.C. kimlik no + doğum tarihi** ile geri dönebilir
-- Belge yükleme (PDF/JPG/PNG), içerik imzasına göre tür doğrulaması
-- Gönderimde **takip kodu** (`LF-XXXX-XXXX`) verilir; durum sorgulaması bu kodla yapılır
+- **Tek sayfalık** başvuru formu; 7 başlık altında gruplanmış, tek gönderimde tamamlanır
+- İstenen tek belge **transkript** (PDF/JPG/PNG, içerik imzasından tür doğrulaması);
+  hazırlık ve 1. sınıf öğrencilerinden istenmez
+- Gönderimde **başvuru numarası** (`LF-XXXX-XXXX`) verilir
+- Aynı dönemde aynı T.C. ile ikinci başvuru engellenir
 - KVKK aydınlatma metni ve açık rıza onayı, onay zamanı kayıt altında
 
 **Federasyon tarafı** — `/yonetim`:
@@ -46,7 +47,7 @@ otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten ha
 - **Dönem yönetimi:** tarih aralığı, kontenjan (asil + yedek), durum (taslak → açık → kapalı → ilan)
 - **Puanlama kriterleri:** 8 kriterin ağırlıkları ve gelir kademeleri panelden düzenlenir
 - **Başvuru listesi:** üniversite, durum, asgari puan ve serbest metin filtreleri; sayfalama
-- **Başvuru detayı:** tüm beyanlar, belgeler, kriter kırılımı ve dikkat uyarıları
+- **Başvuru detayı:** tüm beyanlar, transkript, kriter kırılımı ve dikkat uyarıları
 - **Komisyon puanlama:** her üye 0-100 arası kendi puanını ve notunu girer, ortalaması alınır
 - **Sıralama ve kontenjan:** nihai puana göre listeyi asil/yedek olarak işaretler
 - **CSV dışa aktarım** (Excel uyumlu), **işlem kayıtları**, kullanıcı yönetimi, kurum ayarları
@@ -69,7 +70,7 @@ docker compose up --build
 
 8080 portu doluysa: `PORT=8090 docker compose up --build`
 
-Uçtan uca duman testi (dönem açar, başvuru yapar, belge yükler, puanlar, sıralar):
+Uçtan uca duman testi (dönem açar, formu gönderir, doğrulama kurallarını sınar, puanlar, sıralar):
 
 ```bash
 BASE=http://localhost:8080 ./scripts/duman-testi.sh
@@ -202,6 +203,7 @@ kullanıyor). Yatay ölçekleme gerekirse belgelerin S3/MinIO'ya taşınması ge
    **"Başvurulara açık"** yapın.
 6. Panelde görünen **başvuru bağlantısını** öğrencilerle paylaşın:
    `https://burs.lafed.org.tr/basvuru/2026-2027`
+   (Açık dönem varken sitenin ana sayfası da doğrudan bu formu gösterir.)
 7. Gerekirse **Kriterler** sayfasından ağırlıkları ve gelir kademelerini güncelleyin.
 
 ### Dönem bittiğinde
@@ -210,7 +212,7 @@ kullanıyor). Yatay ölçekleme gerekirse belgelerin S3/MinIO'ya taşınması ge
 2. Komisyon üyeleri başvuruları puanlar
 3. **Sıralama** → "Puanları yeniden hesapla" → "Kontenjanı uygula"
 4. Listeyi kontrol edip gerekirse tek tek düzeltin (başvuru detayından durum değiştirilebilir)
-5. Dönemi **"Sonuçlar ilan edildi"** durumuna alın — öğrenciler takip koduyla sonucu görebilir
+5. Sonuçları öğrencilere federasyon kanalıyla duyurun (sistemde sonuç sorgulama ekranı yoktur)
 
 ---
 

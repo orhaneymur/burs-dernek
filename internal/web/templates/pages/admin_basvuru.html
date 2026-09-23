@@ -19,7 +19,6 @@
         <div><dt>Telefon</dt><dd>{{bosDegil $a.Phone}}</dd></div>
         <div><dt>E-posta</dt><dd>{{bosDegil $a.Email}}</dd></div>
         <div><dt>İl / İlçe</dt><dd>{{bosDegil $a.City}} / {{bosDegil $a.District}}</dd></div>
-        <div class="span-2"><dt>Adres</dt><dd>{{bosDegil $a.Address}}</dd></div>
       </dl>
     </section>
 
@@ -27,12 +26,9 @@
       <h2>Eğitim</h2>
       <dl class="summary">
         <div><dt>Üniversite</dt><dd>{{bosDegil $a.University}}</dd></div>
-        <div><dt>Fakülte</dt><dd>{{bosDegil $a.Faculty}}</dd></div>
         <div><dt>Bölüm</dt><dd>{{bosDegil $a.Department}}</dd></div>
         <div><dt>Sınıf</dt><dd>{{secenek .Data.Classes $a.ClassYear}}</dd></div>
-        <div><dt>Öğretim Türü</dt><dd>{{secenek .Data.EduTypes $a.EducationType}}</dd></div>
-        <div><dt>Öğrenci No</dt><dd>{{bosDegil $a.StudentNo}}</dd></div>
-        <div><dt>GANO</dt><dd>{{if $a.GPA}}{{printf "%.2f" $a.GPA}} ({{$a.GPAScale}}'lük) · 4'lük karşılığı {{printf "%.2f" $a.GPAOutOf4}}{{else}}—{{end}}</dd></div>
+        <div class="span-2"><dt>GANO</dt><dd>{{if $a.GPA}}{{printf "%.2f" $a.GPA}} ({{$a.GPAScale}}'lük) · 4'lük karşılığı {{printf "%.2f" $a.GPAOutOf4}}{{else}}—{{end}}</dd></div>
       </dl>
     </section>
 
@@ -42,9 +38,9 @@
         <div><dt>Hane Geliri</dt><dd>{{para $a.HouseholdIncome}} ₺ / ay</dd></div>
         <div><dt>Hane Kişi Sayısı</dt><dd>{{$a.HouseholdSize}}</dd></div>
         <div><dt>Kişi Başı Gelir</dt><dd><strong>{{para $a.IncomePerCapita}} ₺</strong></dd></div>
-        <div><dt>Barınma</dt><dd>{{secenek .Data.Housing $a.HousingType}}{{if $a.HousingCost}} · {{para $a.HousingCost}} ₺{{end}}</dd></div>
-        <div><dt>Baba</dt><dd>{{secenek .Data.ParentStatus $a.FatherStatus}}{{if $a.FatherJob}} · {{$a.FatherJob}}{{end}}</dd></div>
-        <div><dt>Anne</dt><dd>{{secenek .Data.ParentStatus $a.MotherStatus}}{{if $a.MotherJob}} · {{$a.MotherJob}}{{end}}</dd></div>
+        <div><dt>Barınma</dt><dd>{{secenek .Data.Housing $a.HousingType}}</dd></div>
+        <div><dt>Baba</dt><dd>{{secenek .Data.ParentStatus $a.FatherStatus}}</dd></div>
+        <div><dt>Anne</dt><dd>{{secenek .Data.ParentStatus $a.MotherStatus}}</dd></div>
         <div><dt>Gayrimenkul</dt><dd>{{evetHayir $a.OwnsProperty}}</dd></div>
         <div><dt>Araç</dt><dd>{{evetHayir $a.OwnsVehicle}}</dd></div>
       </dl>
@@ -55,7 +51,7 @@
       <dl class="summary">
         <div><dt>Kardeş</dt><dd>{{$a.SiblingCount}} ({{$a.StudentSiblingCount}} öğrenci)</dd></div>
         <div><dt>Ebeveyn Durumu</dt><dd>{{secenek .Data.ParentsStatus $a.ParentsStatus}}</dd></div>
-        <div><dt>Engellilik</dt><dd>{{evetHayir $a.Disability}}{{if $a.DisabilityNote}} · {{$a.DisabilityNote}}{{end}}</dd></div>
+        <div><dt>Engellilik</dt><dd>{{evetHayir $a.Disability}}</dd></div>
         <div><dt>Şehit/Gazi Yakını</dt><dd>{{evetHayir $a.MartyrRelative}}</dd></div>
         <div><dt>Başka Burs</dt><dd>{{evetHayir $a.OtherScholarship}}{{if $a.OtherScholarship}} · {{$a.OtherScholarshipName}} · {{para $a.OtherScholarshipAmount}} ₺{{end}}</dd></div>
         <div><dt>Kulüp / Dernek</dt><dd>{{bosDegil $a.SportsClub}}</dd></div>

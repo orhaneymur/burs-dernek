@@ -35,7 +35,7 @@ func (s *Server) handleSettingsGet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p := s.newPage(w, r, "Kurum Ayarları")
 	p.Active = "ayarlar"
-	p.Data["OrgName"] = s.st.Setting(ctx, "org_name", "Lüleburgaz İlçe Federasyonu")
+	p.Data["OrgName"] = s.st.Setting(ctx, "org_name", "LAFED Federasyonu")
 	p.Data["Contact"] = s.st.Setting(ctx, "contact", "burs@lafed.org.tr")
 	p.Data["Phone"] = s.st.Setting(ctx, "phone", "")
 	p.Data["Address"] = s.st.Setting(ctx, "address", "")

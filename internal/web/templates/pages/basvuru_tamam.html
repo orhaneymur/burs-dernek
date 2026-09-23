@@ -1,29 +1,26 @@
 {{define "content"}}
-{{$app := .Data.App}}
-<section class="hero narrow success">
-  <div class="big-check" aria-hidden="true">✓</div>
-  <h1>Başvurunuz alındı</h1>
-  <p class="lead">Sayın {{$app.FullName}}, burs başvurunuz {{tarihSaat $app.SubmittedAt}} itibarıyla kaydedildi.</p>
+{{$a := .Data.App}}
+<div class="wrap narrow">
+  <section class="card success-card">
+    <div class="big-check" aria-hidden="true">✓</div>
+    <h1>Başvurunuz alındı</h1>
+    <p class="lead">Sayın {{$a.FullName}}, burs başvurunuz {{tarihSaat $a.SubmittedAt}} itibarıyla kaydedildi.</p>
 
-  <div class="tracking">
-    <span class="muted small">Takip kodunuz</span>
-    <strong class="tracking-code">{{$app.TrackingCode}}</strong>
-    <p class="muted small">Bu kodu ve doğum tarihinizi kullanarak başvurunuzun durumunu sorgulayabilirsiniz. Lütfen not alın veya ekran görüntüsü kaydedin.</p>
-  </div>
-</section>
+    <div class="tracking">
+      <span class="muted small">Başvuru numaranız</span>
+      <strong class="tracking-code">{{$a.TrackingCode}}</strong>
+      <p class="muted small">Federasyonla yazışmalarınızda bu numarayı belirtin.</p>
+    </div>
 
-<section class="card">
-  <h2>Bundan sonra ne olacak?</h2>
-  <ol class="steps-list">
-    <li>Başvurunuz, dönem için belirlenen ölçütlere göre otomatik olarak puanlanır.</li>
-    <li>Burs komisyonu üyeleri başvurunuzu ve belgelerinizi inceler.</li>
-    <li>Sıralama oluşturulur ve kontenjan kadar asil ile yedek aday belirlenir.</li>
-    <li>Sonuçlar ilan edildiğinde takip kodunuzla durumunuzu öğrenebilirsiniz.</li>
-  </ol>
-  {{with .Data.Period}}{{if .ResultNote}}<p class="notice">{{.ResultNote}}</p>{{end}}{{end}}
-  <div class="row-buttons">
-    <a class="btn btn-primary" href="/sorgula">Başvuru durumumu sorgula</a>
-    <a class="btn" href="/">Ana sayfa</a>
-  </div>
-</section>
+    <h2>Bundan sonra ne olacak?</h2>
+    <ol class="steps">
+      <li>Başvurunuz dönem ölçütlerine göre otomatik olarak puanlanır.</li>
+      <li>Burs komisyonu başvurunuzu ve transkriptinizi inceler.</li>
+      <li>Sıralama oluşturulur, kontenjan kadar asil ve yedek aday belirlenir.</li>
+      <li>Sonuç federasyon tarafından tarafınıza bildirilir.</li>
+    </ol>
+    {{with .Data.Period}}{{if .ResultNote}}<p class="notice">{{.ResultNote}}</p>{{end}}{{end}}
+    <p class="muted small">Sorularınız için: {{.Contact}}</p>
+  </section>
+</div>
 {{end}}

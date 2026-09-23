@@ -9,8 +9,7 @@ func TestTemplatesParse(t *testing.T) {
 		t.Fatalf("sablonlar yuklenemedi: %v", err)
 	}
 	want := []string{
-		"anasayfa", "basvuru_giris", "basvuru_adim", "basvuru_tamam", "devam",
-		"sorgula", "kvkk", "hata",
+		"basvuru", "kapali", "basvuru_tamam", "kvkk", "hata",
 		"admin_giris", "admin_panel", "admin_donemler", "admin_donem_form",
 		"admin_kriterler", "admin_basvurular", "admin_basvuru", "admin_siralama",
 		"admin_kullanicilar", "admin_kayitlar", "admin_ayarlar", "admin_sifre",
