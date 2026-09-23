@@ -12,7 +12,11 @@ AD="${AD:-burs}"          # namespace
 cd "$DEPO"
 
 echo "== Depo guncelleniyor"
-git pull --ff-only
+# Dagitim kopyasidir: yereldeki farklar (ornegin dosya izinleri) korunmaz
+git config core.fileMode false
+git fetch --quiet origin
+git reset --quiet --hard origin/main
+chmod +x scripts/*.sh
 
 SURUM="${1:-$(git rev-parse --short HEAD)}"
 IMAJ="lafed-burs:${SURUM}"
