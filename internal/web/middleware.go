@@ -188,8 +188,13 @@ func logRequests(next http.Handler) http.Handler {
 }
 
 // clientIP ingress arkasinda gercek istemci adresini bulur.
+// Cloudflare kullaniliyorsa CF-Connecting-IP en guvenilir kaynaktir;
+// yoksa X-Forwarded-For zincirinin ilk adresi kullanilir.
 func (s *Server) clientIP(r *http.Request) string {
 	if s.cfg.TrustProxy {
+		if v := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); v != "" {
+			return v
+		}
 		if v := r.Header.Get("X-Forwarded-For"); v != "" {
 			parts := strings.Split(v, ",")
 			return strings.TrimSpace(parts[0])
