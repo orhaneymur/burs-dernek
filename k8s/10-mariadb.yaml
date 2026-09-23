@@ -1,0 +1,83 @@
+# MariaDB - tek kopya, kalici disk uzerinde.
+# Sunucunuzda zaten bir MySQL/MariaDB varsa bu dosyayi uygulamayin;
+# yalnizca 00-temel.yaml icindeki DATABASE_DSN degerini o sunucuya yonlendirin.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: burs-mariadb
+  namespace: burs
+spec:
+  selector:
+    app: burs-mariadb
+  ports:
+    - port: 3306
+      targetPort: 3306
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: burs-mariadb
+  namespace: burs
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: burs-mariadb
+  template:
+    metadata:
+      labels:
+        app: burs-mariadb
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: mariadb
+          image: mariadb:11.4
+          args:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+            - --innodb-buffer-pool-size=128M
+            - --max-connections=50
+            - --skip-name-resolve
+          env:
+            - name: MARIADB_DATABASE
+              value: burs
+            - name: MARIADB_USER
+              value: burs
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: MARIADB_ROOT_PASSWORD }
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: MARIADB_PASSWORD }
+            - name: TZ
+              value: Europe/Istanbul
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: veri
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command: ["healthcheck.sh", "--connect", "--innodb_initialized"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command: ["healthcheck.sh", "--connect", "--innodb_initialized"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: veri
+          persistentVolumeClaim:
+            claimName: burs-mariadb-veri

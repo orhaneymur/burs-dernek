@@ -1,0 +1,77 @@
+{{define "content"}}
+{{$p := .Data.Period}}
+{{$c := .Data.Criteria}}
+<div class="page-head">
+  <h1>Puanlama Kriterleri</h1>
+  <a class="btn" href="/yonetim/donemler">← Dönemler</a>
+</div>
+<p class="muted">{{$p.Name}} dönemi için otomatik ön puanlamanın ağırlıkları. Toplam 100 olması gerekmez; sistem oranlayarak 100'lük ölçeğe çevirir.</p>
+
+<form method="post" action="/yonetim/donem/{{$p.ID}}/kriterler" class="card form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+
+  <h2>Kriter Ağırlıkları</h2>
+  <div class="grid-2">
+    <div class="field"><label for="gelir">Kişi başı gelir</label><input id="gelir" name="gelir" inputmode="decimal" value="{{$c.IncomeWeight}}"></div>
+    <div class="field"><label for="akademik">Akademik başarı (GANO)</label><input id="akademik" name="akademik" inputmode="decimal" value="{{$c.AcademicWeight}}"></div>
+    <div class="field"><label for="barinma">Barınma durumu</label><input id="barinma" name="barinma" inputmode="decimal" value="{{$c.HousingWeight}}"></div>
+    <div class="field"><label for="kardes">Kardeş / öğrenci kardeş</label><input id="kardes" name="kardes" inputmode="decimal" value="{{$c.SiblingWeight}}"></div>
+    <div class="field"><label for="ebeveyn">Ebeveyn durumu</label><input id="ebeveyn" name="ebeveyn" inputmode="decimal" value="{{$c.ParentsWeight}}"></div>
+    <div class="field"><label for="ozel">Özel durum (engellilik, şehit/gazi)</label><input id="ozel" name="ozel" inputmode="decimal" value="{{$c.SpecialWeight}}"></div>
+    <div class="field"><label for="burs">Başka burs almama</label><input id="burs" name="burs" inputmode="decimal" value="{{$c.ScholarshipWeight}}"></div>
+    <div class="field"><label for="sosyal">Sosyal katılım</label><input id="sosyal" name="sosyal" inputmode="decimal" value="{{$c.SocialWeight}}"></div>
+  </div>
+  <p class="muted small">Şu anki toplam: <strong>{{puan $c.TotalWeight}}</strong></p>
+
+  <h2>Gelir Kademeleri</h2>
+  <p class="hint">Kişi başı aylık gelir, ilk uyan kademenin oranını alır. Oran 0 ile 1 arasında olmalıdır (1 = tam puan).</p>
+  <table class="table compact">
+    <thead><tr><th>Kişi başı gelir üst sınırı (TL)</th><th>Oran</th></tr></thead>
+    <tbody>
+      {{range $c.IncomeBands}}
+      <tr>
+        <td><input name="band_limit" inputmode="numeric" value="{{.UpTo}}"></td>
+        <td><input name="band_ratio" inputmode="decimal" value="{{.Ratio}}"></td>
+      </tr>
+      {{end}}
+      <tr><td><input name="band_limit" inputmode="numeric" placeholder="yeni kademe"></td><td><input name="band_ratio" inputmode="decimal" placeholder="0,00"></td></tr>
+      <tr><td><input name="band_limit" inputmode="numeric" placeholder="yeni kademe"></td><td><input name="band_ratio" inputmode="decimal" placeholder="0,00"></td></tr>
+    </tbody>
+  </table>
+  <p class="hint">En üst kademenin üzerindeki gelirler gelir kriterinden puan alamaz.</p>
+
+  <h2>Diğer</h2>
+  <div class="grid-2">
+    <div class="field">
+      <label for="asgari_gano">Asgari GANO (4'lük)</label>
+      <input id="asgari_gano" name="asgari_gano" inputmode="decimal" value="{{$c.MinGPA}}">
+      <p class="hint">Altında kalan başvurular listede uyarı ile işaretlenir; otomatik elenmez.</p>
+    </div>
+    <div class="field">
+      <label for="mulkiyet">Mülkiyet beyanı kesintisi (puan)</label>
+      <input id="mulkiyet" name="mulkiyet" inputmode="decimal" value="{{$c.PropertyPenalty}}">
+      <p class="hint">Ailede gayrimenkul veya araç beyanı varsa toplam puandan düşülür.</p>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn" href="/yonetim/donemler">Vazgeç</a>
+    <button class="btn btn-primary" type="submit">Kriterleri kaydet</button>
+  </div>
+</form>
+
+<section class="card">
+  <h2>Kriterler nasıl uygulanır?</h2>
+  <ul class="check-list">
+    <li><strong>Kişi başı gelir:</strong> hane geliri ÷ hanedeki kişi sayısı, yukarıdaki kademelere göre oranlanır.</li>
+    <li><strong>Akademik başarı:</strong> 2,00 taban ve 4,00 tavan kabul edilir. Hazırlık ve 1. sınıf öğrencilerine yarım puan (0,5 oran) verilir.</li>
+    <li><strong>Barınma:</strong> kira 1,00 · özel yurt 0,90 · devlet yurdu 0,60 · akraba yanı 0,50 · aile yanı 0,20.</li>
+    <li><strong>Kardeş:</strong> her kardeş 0,15 · her öğrenci kardeş 0,25 (en çok 1,00).</li>
+    <li><strong>Ebeveyn:</strong> boşanmış 0,60 · bir ebeveyn vefat 0,85 · ikisi vefat 1,00; çalışmayan ebeveyn varsa +0,15.</li>
+    <li><strong>Özel durum:</strong> engelli birey 0,70 · şehit/gazi yakını 0,70 (en çok 1,00).</li>
+    <li><strong>Başka burs:</strong> almıyorsa 1,00; tutara göre 0,50 / 0,25 / 0,00.</li>
+    <li><strong>Sosyal katılım:</strong> gönüllülük beyanı 0,60 · kulüp üyeliği 0,40.</li>
+  </ul>
+  <p class="muted small">Kriterleri değiştirdikten sonra <a href="/yonetim/siralama?donem={{$p.ID}}">Sıralama</a> sayfasından puanları yeniden hesaplayın.</p>
+</section>
+{{end}}

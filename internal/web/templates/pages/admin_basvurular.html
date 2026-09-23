@@ -1,0 +1,98 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>Başvurular</h1>
+  {{if and .Data.Period .User.IsAdmin}}
+  <a class="btn" href="/yonetim/disaaktar?donem={{.Data.Period.ID}}">CSV indir</a>
+  {{end}}
+</div>
+
+{{if .Data.Periods}}
+<form method="get" action="/yonetim/basvurular" class="card filter-bar">
+  <div class="field">
+    <label for="donem">Dönem</label>
+    <select id="donem" name="donem">
+      {{range .Data.Periods}}<option value="{{.ID}}"{{if and $.Data.Period (eq $.Data.Period.ID .ID)}} selected{{end}}>{{.Name}}</option>{{end}}
+    </select>
+  </div>
+  <div class="field">
+    <label for="durum">Durum</label>
+    <select id="durum" name="durum">
+      <option value="">Taslak hariç tümü</option>
+      {{$f := .Data.Filter}}
+      {{range .Data.StatusOptions}}<option value="{{.Value}}"{{if eq (index $f "durum") .Value}} selected{{end}}>{{.Label}}</option>{{end}}
+    </select>
+  </div>
+  <div class="field">
+    <label for="universite">Üniversite</label>
+    <select id="universite" name="universite">
+      <option value="">Tümü</option>
+      {{range .Data.Universities}}<option value="{{.}}"{{if eq (index $.Data.Filter "universite") .}} selected{{end}}>{{.}}</option>{{end}}
+    </select>
+  </div>
+  <div class="field">
+    <label for="ara">Ara</label>
+    <input id="ara" name="ara" value="{{index .Data.Filter "ara"}}" placeholder="Ad, takip kodu, e-posta">
+  </div>
+  <div class="field">
+    <label for="asgari">Asgari puan</label>
+    <input id="asgari" name="asgari" inputmode="decimal" value="{{index .Data.Filter "asgari"}}">
+  </div>
+  <div class="field">
+    <label for="sirala">Sırala</label>
+    <select id="sirala" name="sirala">
+      <option value="">Puana göre</option>
+      <option value="tarih"{{if eq (index .Data.Filter "sirala") "tarih"}} selected{{end}}>Başvuru tarihine göre</option>
+      <option value="ad"{{if eq (index .Data.Filter "sirala") "ad"}} selected{{end}}>Ada göre</option>
+    </select>
+  </div>
+  <div class="field field-actions">
+    <button class="btn btn-primary" type="submit">Filtrele</button>
+  </div>
+</form>
+{{end}}
+
+{{if .Data.Apps}}
+<p class="muted">{{.Data.Total}} başvuru bulundu · {{.Data.Page}}. sayfa / {{.Data.Pages}}</p>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th><th>Öğrenci</th><th>Üniversite / Bölüm</th><th>Kişi başı gelir</th><th>GANO</th>
+      <th>Otomatik</th><th>Komisyon</th><th>Nihai</th><th>Durum</th><th>Belge</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Data.Apps}}
+    <tr>
+      <td class="muted">{{if .RankNo}}{{.RankNo}}{{else}}—{{end}}</td>
+      <td>
+        <a href="/yonetim/basvuru/{{.ID}}"><strong>{{.FullName}}</strong></a><br>
+        <span class="muted small">{{.TrackingCode}} · {{tarihKisa .SubmittedAt}}</span>
+      </td>
+      <td>{{.University}}<br><span class="muted small">{{.Department}} · {{secenek $.Data.Classes .ClassYear}}</span></td>
+      <td>{{para .IncomePerCapita}} ₺</td>
+      <td>{{if .GPA}}{{printf "%.2f" .GPA}}{{else}}—{{end}}</td>
+      <td>{{puan .AutoScore}}</td>
+      <td>{{if .ReviewCount}}{{puan .CommitteeScore}} <span class="muted small">({{.ReviewCount}})</span>{{else}}<span class="muted">—</span>{{end}}</td>
+      <td><strong>{{puan .FinalScore}}</strong></td>
+      <td>{{template "durum_rozeti" .Status}}</td>
+      <td>{{.DocCount}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+
+{{if gt .Data.Pages 1}}
+<nav class="pagination">
+  {{$page := .Data.Page}}
+  {{if gt $page 1}}<a class="btn btn-sm" href="?donem={{.Data.Period.ID}}&amp;durum={{index .Data.Filter "durum"}}&amp;ara={{index .Data.Filter "ara"}}&amp;sayfa={{cikar $page 1}}">← Önceki</a>{{end}}
+  <span class="muted">{{$page}} / {{.Data.Pages}}</span>
+  {{if lt $page .Data.Pages}}<a class="btn btn-sm" href="?donem={{.Data.Period.ID}}&amp;durum={{index .Data.Filter "durum"}}&amp;ara={{index .Data.Filter "ara"}}&amp;sayfa={{topla $page 1}}">Sonraki →</a>{{end}}
+</nav>
+{{end}}
+
+{{else}}
+<div class="card"><div class="notice"><strong>Bu filtrelerle başvuru bulunamadı.</strong></div></div>
+{{end}}
+{{end}}

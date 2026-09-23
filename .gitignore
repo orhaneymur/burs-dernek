@@ -1,0 +1,21 @@
+# Derleme ciktilari
+/burs
+/burs.exe
+/out/
+/dist/
+
+# Yerel veri
+/data/
+*.key
+*.sql.gz
+*.tar.gz
+
+# Ortam dosyalari
+.env
+.env.local
+
+# Editor
+.idea/
+.vscode/
+*.swp
+.DS_Store

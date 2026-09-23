@@ -1,0 +1,23 @@
+{{define "content"}}
+<section class="hero narrow">
+  <h1>Başvuruma devam et</h1>
+  <p class="lead">Yarım kalan başvurunuzu, T.C. kimlik numaranız ve doğum tarihinizle kaldığınız yerden sürdürebilirsiniz.</p>
+</section>
+
+<section class="card narrow-card">
+  {{with index .Errors "genel"}}<div class="flash flash-hata" role="alert">{{.}}</div>{{end}}
+  <form method="post" action="/devam" class="form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="field">
+      <label for="national_id">T.C. Kimlik Numarası</label>
+      <input id="national_id" name="national_id" inputmode="numeric" maxlength="11" value="{{index .FormVals "national_id"}}" required>
+    </div>
+    <div class="field">
+      <label for="birth_date">Doğum Tarihi</label>
+      <input id="birth_date" name="birth_date" type="date" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Başvuruma devam et</button>
+  </form>
+  <p class="muted small mt">Henüz başvuru yapmadıysanız <a href="/">ana sayfadan</a> yeni başvuru açabilirsiniz.</p>
+</section>
+{{end}}

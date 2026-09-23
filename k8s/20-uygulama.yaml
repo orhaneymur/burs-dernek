@@ -1,0 +1,131 @@
+# Burs uygulamasi: Deployment + Service + Ingress
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: burs
+  namespace: burs
+  labels:
+    app: burs
+spec:
+  replicas: 1          # Belgeler RWO disk uzerinde tutulur; tek kopya calismalidir
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: burs
+  template:
+    metadata:
+      labels:
+        app: burs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: burs
+          image: ghcr.io/DEGISTIRIN/lafed-burs:1.0.0   # kendi imaj adresinizle degistirin
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: BASE_URL
+              value: "https://burs.lafed.org.tr"
+            - name: TRUST_PROXY
+              value: "true"
+            - name: MAX_UPLOAD_MB
+              value: "8"
+            - name: TZ
+              value: Europe/Istanbul
+            # Gizli degerler yalnizca gerekli olanlarla sinirli tutulur
+            - name: DATABASE_DSN
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: DATABASE_DSN }
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: SECRET_KEY }
+            - name: BOOTSTRAP_ADMIN_USER
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: BOOTSTRAP_ADMIN_USER }
+            - name: BOOTSTRAP_ADMIN_PASS
+              valueFrom:
+                secretKeyRef: { name: burs-gizli, key: BOOTSTRAP_ADMIN_PASS }
+          volumeMounts:
+            - name: veri
+              mountPath: /data
+            - name: gecici
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 48Mi
+            limits:
+              memory: 192Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            httpGet: { path: /saglik, port: http }
+            failureThreshold: 30
+            periodSeconds: 3
+          livenessProbe:
+            httpGet: { path: /saglik, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet: { path: /saglik, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+      volumes:
+        - name: veri
+          persistentVolumeClaim:
+            claimName: burs-veri
+        - name: gecici          # buyuk dosya yuklemelerinde gecici tasma alani
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: burs
+  namespace: burs
+spec:
+  selector:
+    app: burs
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: burs
+  namespace: burs
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod    # cert-manager kurulu degilse bu satiri silin
+    nginx.ingress.kubernetes.io/proxy-body-size: "16m"  # belge yuklemeleri icin
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [burs.lafed.org.tr]
+      secretName: burs-tls
+  rules:
+    - host: burs.lafed.org.tr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: burs
+                port:
+                  name: http

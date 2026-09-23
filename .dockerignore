@@ -1,0 +1,9 @@
+.git
+.gitignore
+.github
+data
+k8s
+docs
+docker-compose.yml
+*.md
+.env*

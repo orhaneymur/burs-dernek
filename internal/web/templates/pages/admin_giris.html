@@ -1,0 +1,23 @@
+{{define "content"}}
+<div class="login-wrap">
+  <div class="card login-card">
+    <h1>Burs Yönetim Paneli</h1>
+    <p class="muted">{{.OrgName}}</p>
+    {{with index .Errors "genel"}}<div class="flash flash-hata" role="alert">{{.}}</div>{{end}}
+    <form method="post" action="/yonetim/giris" class="form">
+      <input type="hidden" name="csrf" value="{{.CSRF}}">
+      <input type="hidden" name="hedef" value="{{.Data.Target}}">
+      <div class="field">
+        <label for="username">Kullanıcı Adı</label>
+        <input id="username" name="username" autocomplete="username" value="{{index .FormVals "username"}}" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Şifre</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Giriş yap</button>
+    </form>
+    <p class="muted small mt"><a href="/">← Başvuru sayfasına dön</a></p>
+  </div>
+</div>
+{{end}}

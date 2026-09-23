@@ -1,0 +1,69 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>Panel</h1>
+  {{if .Data.Periods}}
+  <form method="get" action="/yonetim/" class="inline-form">
+    <label for="donem" class="sr-only">Dönem</label>
+    <select id="donem" name="donem" data-auto-submit>
+      {{range .Data.Periods}}<option value="{{.ID}}"{{if and $.Data.Period (eq $.Data.Period.ID .ID)}} selected{{end}}>{{.Name}}</option>{{end}}
+    </select>
+    <noscript><button class="btn" type="submit">Seç</button></noscript>
+  </form>
+  {{end}}
+</div>
+
+{{with .Data.Period}}
+<section class="card">
+  <div class="period-head">
+    <div>
+      <h2>{{.Name}}</h2>
+      <p class="muted">{{tarih .OpensAt}} – {{tarih .ClosesAt}} · {{.StatusLabel}} · Kontenjan {{.Quota}} asil / {{.ReserveQuota}} yedek</p>
+    </div>
+    {{if $.User.IsAdmin}}<a class="btn" href="/yonetim/donem/{{.ID}}">Dönemi düzenle</a>{{end}}
+  </div>
+  <div class="apply-link">
+    <span class="muted small">Öğrencilere verilecek başvuru bağlantısı</span>
+    <code>{{$.Data.ApplyURL}}</code>
+  </div>
+</section>
+
+{{with $.Data.Stats}}
+<section class="stat-grid">
+  <div class="stat"><span class="stat-num">{{.Total}}</span><span class="stat-label">Toplam başvuru</span></div>
+  <div class="stat"><span class="stat-num">{{.Submitted}}</span><span class="stat-label">Yeni başvuru</span></div>
+  <div class="stat"><span class="stat-num">{{.Reviewing}}</span><span class="stat-label">İncelemede</span></div>
+  <div class="stat"><span class="stat-num">{{.Reviewed}}</span><span class="stat-label">Puanlanan</span></div>
+  <div class="stat"><span class="stat-num">{{.Accepted}}</span><span class="stat-label">Asil</span></div>
+  <div class="stat"><span class="stat-num">{{.Reserve}}</span><span class="stat-label">Yedek</span></div>
+  <div class="stat"><span class="stat-num">{{.Drafts}}</span><span class="stat-label">Tamamlanmamış taslak</span></div>
+  <div class="stat"><span class="stat-num">{{puan .AvgFinal}}</span><span class="stat-label">Ortalama puan</span></div>
+</section>
+{{end}}
+
+<section class="card">
+  <h2>Yapılacaklar</h2>
+  {{if $.Data.Pending}}
+    <p>Henüz puanlamadığınız <strong>{{$.Data.Pending}}</strong> başvuru var.</p>
+    <a class="btn btn-primary" href="/yonetim/basvurular?donem={{.ID}}&amp;durum=basvuruldu">Puanlamaya başla</a>
+  {{else}}
+    <p>Bu dönemde puanlamadığınız başvuru kalmadı.</p>
+  {{end}}
+  <div class="row-buttons mt">
+    <a class="btn" href="/yonetim/basvurular?donem={{.ID}}">Tüm başvurular</a>
+    {{if $.User.IsAdmin}}
+    <a class="btn" href="/yonetim/siralama?donem={{.ID}}">Sıralama ve kontenjan</a>
+    <a class="btn" href="/yonetim/donem/{{.ID}}/kriterler">Puanlama kriterleri</a>
+    <a class="btn" href="/yonetim/disaaktar?donem={{.ID}}">CSV indir</a>
+    {{end}}
+  </div>
+</section>
+{{else}}
+<section class="card">
+  <div class="notice">
+    <strong>Henüz bir başvuru dönemi oluşturulmamış.</strong>
+    <p>Öğrencilere başvuru bağlantısı verebilmek için önce bir dönem açmalısınız.</p>
+  </div>
+  {{if .User.IsAdmin}}<a class="btn btn-primary" href="/yonetim/donem/yeni">Yeni dönem oluştur</a>{{end}}
+</section>
+{{end}}
+{{end}}

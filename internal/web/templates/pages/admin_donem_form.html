@@ -1,0 +1,82 @@
+{{define "content"}}
+{{$p := .Data.Period}}
+{{$new := .Data.New}}
+<div class="page-head">
+  <h1>{{if $new}}Yeni Dönem{{else}}Dönemi Düzenle{{end}}</h1>
+  <a class="btn" href="/yonetim/donemler">← Dönemler</a>
+</div>
+
+<form method="post" action="{{if $new}}/yonetim/donem/yeni{{else}}/yonetim/donem/{{$p.ID}}{{end}}" class="card form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+
+  <div class="field">
+    <label for="name">Dönem Adı *</label>
+    <input id="name" name="name" value="{{$p.Name}}" required>
+    {{with index .Errors "name"}}<p class="field-error">{{.}}</p>{{end}}
+  </div>
+
+  <div class="field">
+    <label for="slug">Bağlantı Adresi (slug)</label>
+    <input id="slug" name="slug" value="{{$p.Slug}}" placeholder="2026-2027">
+    <p class="hint">Başvuru bağlantısı: {{.BaseURL}}/basvuru/<strong>{{if $p.Slug}}{{$p.Slug}}{{else}}2026-2027{{end}}</strong></p>
+  </div>
+
+  <div class="field">
+    <label for="description">Açıklama</label>
+    <textarea id="description" name="description" rows="3">{{$p.Description}}</textarea>
+    <p class="hint">Başvuru sayfasının üstünde gösterilir.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label for="opens_at">Başvuru Başlangıcı *</label>
+      <input id="opens_at" name="opens_at" type="datetime-local" value="{{tarihSaatInput $p.OpensAt}}" required>
+    </div>
+    <div class="field">
+      <label for="closes_at">Başvuru Bitişi *</label>
+      <input id="closes_at" name="closes_at" type="datetime-local" value="{{tarihSaatInput $p.ClosesAt}}" required>
+      {{with index .Errors "tarih"}}<p class="field-error">{{.}}</p>{{end}}
+    </div>
+    <div class="field">
+      <label for="quota">Asil Kontenjan</label>
+      <input id="quota" name="quota" inputmode="numeric" value="{{$p.Quota}}">
+    </div>
+    <div class="field">
+      <label for="reserve_quota">Yedek Kontenjan</label>
+      <input id="reserve_quota" name="reserve_quota" inputmode="numeric" value="{{$p.ReserveQuota}}">
+    </div>
+    <div class="field">
+      <label for="auto_weight">Otomatik Puan Ağırlığı (%)</label>
+      <input id="auto_weight" name="auto_weight" inputmode="numeric" value="{{printf "%.0f" (mul $p.AutoWeight 100.0)}}">
+    </div>
+    <div class="field">
+      <label for="committee_weight">Komisyon Puanı Ağırlığı (%)</label>
+      <input id="committee_weight" name="committee_weight" inputmode="numeric" value="{{printf "%.0f" (mul $p.CommitteeWeight 100.0)}}">
+      <p class="hint">İkisinin toplamı otomatik olarak %100'e normalize edilir.</p>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="status">Durum</label>
+    <select id="status" name="status">
+      <option value="taslak"{{if eq $p.Status "taslak"}} selected{{end}}>Taslak (bağlantı kapalı)</option>
+      <option value="acik"{{if eq $p.Status "acik"}} selected{{end}}>Başvurulara açık</option>
+      <option value="kapali"{{if eq $p.Status "kapali"}} selected{{end}}>Başvurular kapalı</option>
+      <option value="ilan"{{if eq $p.Status "ilan"}} selected{{end}}>Sonuçlar ilan edildi</option>
+    </select>
+  </div>
+
+  <label class="check"><input type="checkbox" name="require_docs" value="on"{{if $p.RequireDocs}} checked{{end}}><span>Zorunlu belgeler yüklenmeden başvuru gönderilemesin</span></label>
+
+  <div class="field">
+    <label for="result_note">Sonuç Duyuru Notu</label>
+    <textarea id="result_note" name="result_note" rows="3">{{$p.ResultNote}}</textarea>
+    <p class="hint">Sonuç sorgulama ekranında öğrencilere gösterilir.</p>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn" href="/yonetim/donemler">Vazgeç</a>
+    <button class="btn btn-primary" type="submit">{{if $new}}Dönemi oluştur{{else}}Kaydet{{end}}</button>
+  </div>
+</form>
+{{end}}

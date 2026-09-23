@@ -1,0 +1,76 @@
+# Her gece 03:15'te veritabani dokumu ve yuklenen belgelerin yedegi.
+# Son 30 gunun yedegi saklanir.
+#
+# NOT: Yuklenen belgeler ReadWriteOnce bir diskte durdugu icin bu is, uygulama
+# pod'u ile ayni dugumde calismalidir. Tek dugumlu kurulumlarda sorun olmaz;
+# cok dugumlu kumede yalnizca veritabani yedegi almak icin "belgeler" bolumunu
+# ve ilgili volumeMount'u kaldirin.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: burs-yedek
+  namespace: burs
+spec:
+  schedule: "15 3 * * *"
+  timeZone: "Europe/Istanbul"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            fsGroup: 10001
+          containers:
+            - name: yedek
+              image: mariadb:11.4
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  TARIH=$(date +%Y%m%d-%H%M)
+                  mkdir -p /yedek/db /yedek/belgeler
+
+                  echo "Veritabani dokumu aliniyor..."
+                  mariadb-dump -h burs-mariadb -u root -p"$MARIADB_ROOT_PASSWORD" \
+                    --single-transaction --routines --events --default-character-set=utf8mb4 \
+                    burs | gzip -9 > "/yedek/db/burs-$TARIH.sql.gz"
+
+                  if [ -d /belgeler/uploads ]; then
+                    echo "Belgeler arsivleniyor..."
+                    tar -czf "/yedek/belgeler/belgeler-$TARIH.tar.gz" -C /belgeler uploads
+                  fi
+
+                  echo "30 gunden eski yedekler siliniyor..."
+                  find /yedek -name '*.gz' -type f -mtime +30 -delete
+                  echo "Yedekleme tamam: $TARIH"
+                  ls -lh /yedek/db | tail -5
+              env:
+                - name: MARIADB_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef: { name: burs-gizli, key: MARIADB_ROOT_PASSWORD }
+                - name: TZ
+                  value: Europe/Istanbul
+              volumeMounts:
+                - name: yedek
+                  mountPath: /yedek
+                - name: belgeler
+                  mountPath: /belgeler
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+          volumes:
+            - name: yedek
+              persistentVolumeClaim:
+                claimName: burs-yedek
+            - name: belgeler
+              persistentVolumeClaim:
+                claimName: burs-veri

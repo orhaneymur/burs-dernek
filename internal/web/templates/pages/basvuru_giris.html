@@ -1,0 +1,50 @@
+{{define "content"}}
+{{$period := .Data.Period}}
+<section class="hero narrow">
+  <h1>{{$period.Name}}</h1>
+  {{if $period.Description}}<p class="lead">{{$period.Description}}</p>{{end}}
+  {{template "donem_kart" $period}}
+</section>
+
+{{if .Data.Open}}
+<section class="card">
+  <h2>Başlamadan önce</h2>
+  <ul class="check-list">
+    <li>T.C. kimlik numaranız ve öğrenci bilgileriniz hazır olsun.</li>
+    <li>Hane gelirinizi aylık net toplam olarak gireceksiniz.</li>
+    <li>Belgeleri PDF, JPG veya PNG olarak yükleyeceksiniz (her biri en çok {{.Data.MaxUploadMB}} MB).</li>
+    <li>Formu yarıda bırakırsanız T.C. kimlik numaranız ve doğum tarihinizle geri dönebilirsiniz.</li>
+  </ul>
+
+  <h3>İstenen belgeler</h3>
+  <ul class="doc-list">
+    {{range .Data.Docs}}
+    <li><strong>{{.Label}}</strong>{{if .Required}} <span class="tag">zorunlu</span>{{end}} <span class="muted small">{{.Hint}}</span></li>
+    {{end}}
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Kişisel verilerin korunması</h2>
+  <div class="kvkk-box">{{range satirlar .Data.KVKK}}<p>{{.}}</p>{{end}}</div>
+
+  <form method="post" action="/basvuru/{{$period.Slug}}" class="mt">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="hp" aria-hidden="true"><label>Web siteniz<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <label class="check">
+      <input type="checkbox" name="kvkk" value="on" required>
+      <span>Aydınlatma metnini okudum; kişisel verilerimin ve özel nitelikli verilerimin burs değerlendirmesi amacıyla işlenmesine açık rıza veriyorum.</span>
+    </label>
+    <button class="btn btn-primary btn-lg" type="submit">Başvuruya başla</button>
+  </form>
+</section>
+{{else}}
+<section class="card">
+  <div class="notice">
+    <strong>Bu dönem şu anda başvuruya açık değil.</strong>
+    <p>Başvuru tarihleri: {{tarih $period.OpensAt}} – {{tarih $period.ClosesAt}}</p>
+  </div>
+  <a class="btn" href="/">Ana sayfaya dön</a>
+</section>
+{{end}}
+{{end}}

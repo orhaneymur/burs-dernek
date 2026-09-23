@@ -1,0 +1,64 @@
+{{define "content"}}
+<section class="hero">
+  <h1>Üniversite Öğrenimi Burs Başvurusu</h1>
+  <p class="lead">{{.OrgName}} olarak üniversite öğrencilerimize karşılıksız burs veriyoruz. Başvurular çevrim içi alınır ve tüm başvurular aynı ölçütlerle değerlendirilir.</p>
+
+  {{with .Data.Period}}
+    {{template "donem_kart" .}}
+    {{if $.Data.Open}}
+      <a class="btn btn-primary btn-lg" href="/basvuru/{{.Slug}}">Başvuru formunu doldur</a>
+      <p class="muted small">Formu tek seferde bitirmek zorunda değilsiniz; kaydedip sonra devam edebilirsiniz.</p>
+    {{else if eq .Status "ilan"}}
+      <div class="notice">
+        <strong>Sonuçlar açıklandı.</strong>
+        <p>Başvuru durumunuzu <a href="/sorgula">Başvuru Sorgula</a> sayfasından takip kodunuzla öğrenebilirsiniz.</p>
+        {{if .ResultNote}}<p>{{.ResultNote}}</p>{{end}}
+      </div>
+    {{else}}
+      <div class="notice">
+        <strong>Başvurular şu anda kapalı.</strong>
+        <p>Bir sonraki dönem açıldığında bu sayfadan duyurulacaktır.</p>
+      </div>
+    {{end}}
+  {{else}}
+    <div class="notice">
+      <strong>Şu anda açık bir başvuru dönemi bulunmuyor.</strong>
+      <p>Yeni dönem açıldığında başvuru bağlantısı bu sayfada yayımlanacaktır.</p>
+    </div>
+  {{end}}
+</section>
+
+<section class="cols">
+  <div class="card">
+    <h2>Başvuru nasıl ilerler?</h2>
+    <ol class="steps-list">
+      <li><strong>Formu doldurun.</strong> Kimlik, eğitim, ekonomik durum ve aile bilgileri 7 kısa adımda alınır.</li>
+      <li><strong>Belgeleri yükleyin.</strong> PDF, JPG veya PNG olarak e-Devlet çıktılarınızı ekleyin.</li>
+      <li><strong>Başvurunuzu gönderin.</strong> Size bir takip kodu verilir; bu kodu saklayın.</li>
+      <li><strong>Değerlendirme.</strong> Başvurunuz önce ölçütlere göre puanlanır, ardından burs komisyonu tarafından incelenir.</li>
+      <li><strong>Sonuç.</strong> Sonuçlar ilan edildiğinde takip kodunuzla durumunuzu sorgulayabilirsiniz.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Hazırlamanız gereken belgeler</h2>
+    <ul class="doc-list">
+      {{range .Data.Docs}}
+      <li>
+        <strong>{{.Label}}</strong>{{if .Required}} <span class="tag">zorunlu</span>{{end}}
+        <span class="muted small">{{.Hint}}</span>
+      </li>
+      {{end}}
+    </ul>
+    <p class="muted small">Her dosya en fazla birkaç MB olmalıdır. Belgeleriniz yalnızca burs komisyonu tarafından görüntülenir.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Başvurunuza devam etmek veya sonucu öğrenmek</h2>
+  <div class="row-buttons">
+    <a class="btn" href="/devam">Yarım kalan başvuruma devam et</a>
+    <a class="btn" href="/sorgula">Başvuru durumumu sorgula</a>
+  </div>
+</section>
+{{end}}

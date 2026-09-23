@@ -1,0 +1,191 @@
+{{define "content"}}
+{{$a := .Data.App}}
+<div class="page-head">
+  <div>
+    <h1>{{$a.FullName}}</h1>
+    <p class="muted">{{$a.TrackingCode}} · {{tarihSaat $a.SubmittedAt}} · {{template "durum_rozeti" $a.Status}}</p>
+  </div>
+  <a class="btn" href="/yonetim/basvurular?donem={{$a.PeriodID}}">← Başvurular</a>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <section class="card">
+      <h2>Kimlik ve İletişim</h2>
+      <dl class="summary">
+        <div><dt>T.C. Kimlik No</dt><dd>{{.Data.NationalID}}</dd></div>
+        <div><dt>Doğum Tarihi</dt><dd>{{tarihKisa $a.BirthDate}}</dd></div>
+        <div><dt>Cinsiyet</dt><dd>{{secenek .Data.Genders $a.Gender}}</dd></div>
+        <div><dt>Telefon</dt><dd>{{bosDegil $a.Phone}}</dd></div>
+        <div><dt>E-posta</dt><dd>{{bosDegil $a.Email}}</dd></div>
+        <div><dt>İl / İlçe</dt><dd>{{bosDegil $a.City}} / {{bosDegil $a.District}}</dd></div>
+        <div class="span-2"><dt>Adres</dt><dd>{{bosDegil $a.Address}}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Eğitim</h2>
+      <dl class="summary">
+        <div><dt>Üniversite</dt><dd>{{bosDegil $a.University}}</dd></div>
+        <div><dt>Fakülte</dt><dd>{{bosDegil $a.Faculty}}</dd></div>
+        <div><dt>Bölüm</dt><dd>{{bosDegil $a.Department}}</dd></div>
+        <div><dt>Sınıf</dt><dd>{{secenek .Data.Classes $a.ClassYear}}</dd></div>
+        <div><dt>Öğretim Türü</dt><dd>{{secenek .Data.EduTypes $a.EducationType}}</dd></div>
+        <div><dt>Öğrenci No</dt><dd>{{bosDegil $a.StudentNo}}</dd></div>
+        <div><dt>GANO</dt><dd>{{if $a.GPA}}{{printf "%.2f" $a.GPA}} ({{$a.GPAScale}}'lük) · 4'lük karşılığı {{printf "%.2f" $a.GPAOutOf4}}{{else}}—{{end}}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Ekonomik Durum</h2>
+      <dl class="summary">
+        <div><dt>Hane Geliri</dt><dd>{{para $a.HouseholdIncome}} ₺ / ay</dd></div>
+        <div><dt>Hane Kişi Sayısı</dt><dd>{{$a.HouseholdSize}}</dd></div>
+        <div><dt>Kişi Başı Gelir</dt><dd><strong>{{para $a.IncomePerCapita}} ₺</strong></dd></div>
+        <div><dt>Barınma</dt><dd>{{secenek .Data.Housing $a.HousingType}}{{if $a.HousingCost}} · {{para $a.HousingCost}} ₺{{end}}</dd></div>
+        <div><dt>Baba</dt><dd>{{secenek .Data.ParentStatus $a.FatherStatus}}{{if $a.FatherJob}} · {{$a.FatherJob}}{{end}}</dd></div>
+        <div><dt>Anne</dt><dd>{{secenek .Data.ParentStatus $a.MotherStatus}}{{if $a.MotherJob}} · {{$a.MotherJob}}{{end}}</dd></div>
+        <div><dt>Gayrimenkul</dt><dd>{{evetHayir $a.OwnsProperty}}</dd></div>
+        <div><dt>Araç</dt><dd>{{evetHayir $a.OwnsVehicle}}</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Aile ve Özel Durum</h2>
+      <dl class="summary">
+        <div><dt>Kardeş</dt><dd>{{$a.SiblingCount}} ({{$a.StudentSiblingCount}} öğrenci)</dd></div>
+        <div><dt>Ebeveyn Durumu</dt><dd>{{secenek .Data.ParentsStatus $a.ParentsStatus}}</dd></div>
+        <div><dt>Engellilik</dt><dd>{{evetHayir $a.Disability}}{{if $a.DisabilityNote}} · {{$a.DisabilityNote}}{{end}}</dd></div>
+        <div><dt>Şehit/Gazi Yakını</dt><dd>{{evetHayir $a.MartyrRelative}}</dd></div>
+        <div><dt>Başka Burs</dt><dd>{{evetHayir $a.OtherScholarship}}{{if $a.OtherScholarship}} · {{$a.OtherScholarshipName}} · {{para $a.OtherScholarshipAmount}} ₺{{end}}</dd></div>
+        <div><dt>Kulüp / Dernek</dt><dd>{{bosDegil $a.SportsClub}}</dd></div>
+      </dl>
+    </section>
+
+    {{if $a.VolunteerText}}
+    <section class="card">
+      <h2>Gönüllü Çalışmalar</h2>
+      <div class="prose">{{range satirlar $a.VolunteerText}}<p>{{.}}</p>{{end}}</div>
+    </section>
+    {{end}}
+
+    {{if $a.MotivationText}}
+    <section class="card">
+      <h2>Burs Talebi Gerekçesi</h2>
+      <div class="prose">{{range satirlar $a.MotivationText}}<p>{{.}}</p>{{end}}</div>
+    </section>
+    {{end}}
+  </div>
+
+  <aside class="detail-side">
+    <section class="card score-card">
+      <h2>Puan Durumu</h2>
+      <div class="score-row"><span>Otomatik puan</span><strong>{{puan $a.AutoScore}}</strong></div>
+      <div class="score-row"><span>Komisyon ortalaması</span><strong>{{if .Data.Reviews}}{{puan $a.CommitteeScore}}{{else}}—{{end}}</strong></div>
+      <div class="score-row total"><span>Nihai puan</span><strong>{{puan $a.FinalScore}}</strong></div>
+      {{if $a.RankNo}}<p class="muted small">Sıralama: {{$a.RankNo}}.</p>{{end}}
+
+      {{with .Data.Breakdown}}
+        {{if .Flags}}
+        <div class="notice notice-warn small">
+          <strong>Dikkat edilecekler</strong>
+          <ul>{{range .Flags}}<li>{{.}}</li>{{end}}</ul>
+        </div>
+        {{end}}
+        <h3>Kriter Kırılımı</h3>
+        <ul class="breakdown">
+          {{range .Items}}
+          <li>
+            <div class="breakdown-head"><span>{{.Label}}</span><strong>{{puan .Points}} / {{puan .Weight}}</strong></div>
+            <div class="mini-bar"><span style="width:{{barGenislik .Ratio}}"></span></div>
+            <span class="muted small">{{.Detail}}</span>
+          </li>
+          {{end}}
+        </ul>
+        {{if .Penalty}}<p class="muted small">Mülkiyet beyanı kesintisi: −{{puan .Penalty}} puan</p>{{end}}
+      {{end}}
+    </section>
+
+    <section class="card">
+      <h2>Belgeler</h2>
+      {{if .Data.Docs}}
+      <ul class="doc-links">
+        {{range .Data.Docs}}
+        <li>
+          <a href="/yonetim/belge/{{.ID}}" target="_blank" rel="noopener">{{belgeAdi .Kind}}</a>
+          <span class="muted small">{{.OriginalName}} · {{kb .SizeBytes}}</span>
+        </li>
+        {{end}}
+      </ul>
+      {{else}}
+      <p class="muted">Belge yüklenmemiş.</p>
+      {{end}}
+    </section>
+
+    <section class="card">
+      <h2>Komisyon Değerlendirmeniz</h2>
+      <form method="post" action="/yonetim/basvuru/{{$a.ID}}/puan" class="form">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <div class="field">
+          <label for="puan">Puanınız (0-100)</label>
+          <input id="puan" name="puan" inputmode="decimal" value="{{with .Data.MyReview}}{{printf "%.0f" .Score}}{{end}}" required>
+        </div>
+        <div class="field">
+          <label for="notlar">Notunuz</label>
+          <textarea id="notlar" name="notlar" rows="4">{{with .Data.MyReview}}{{.Notes}}{{end}}</textarea>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">{{if .Data.MyReview}}Değerlendirmemi güncelle{{else}}Değerlendirmemi kaydet{{end}}</button>
+      </form>
+    </section>
+
+    {{if .Data.Reviews}}
+    <section class="card">
+      <h2>Tüm Değerlendirmeler</h2>
+      <ul class="review-list">
+        {{range .Data.Reviews}}
+        <li>
+          <div class="review-head"><strong>{{.ReviewerName}}</strong><span class="score-pill">{{puan .Score}}</span></div>
+          {{if .Notes}}<p class="muted small">{{.Notes}}</p>{{end}}
+          <span class="muted small">{{tarihSaat .UpdatedAt}}</span>
+        </li>
+        {{end}}
+      </ul>
+    </section>
+    {{end}}
+
+    {{if .User.IsAdmin}}
+    <section class="card">
+      <h2>Yönetici İşlemleri</h2>
+      <form method="post" action="/yonetim/basvuru/{{$a.ID}}/durum" class="form">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <div class="field">
+          <label for="status">Başvuru Durumu</label>
+          <select id="status" name="status">
+            <option value="basvuruldu"{{if eq $a.Status "basvuruldu"}} selected{{end}}>Başvuruldu</option>
+            <option value="incelemede"{{if eq $a.Status "incelemede"}} selected{{end}}>İncelemede</option>
+            <option value="asil"{{if eq $a.Status "asil"}} selected{{end}}>Asil</option>
+            <option value="yedek"{{if eq $a.Status "yedek"}} selected{{end}}>Yedek</option>
+            <option value="red"{{if eq $a.Status "red"}} selected{{end}}>Değerlendirme dışı</option>
+          </select>
+        </div>
+        <button class="btn btn-block" type="submit">Durumu güncelle</button>
+      </form>
+
+      <form method="post" action="/yonetim/basvuru/{{$a.ID}}/not" class="form mt">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <div class="field">
+          <label for="not">Yönetici Notu</label>
+          <textarea id="not" name="not" rows="3">{{$a.AdminNote}}</textarea>
+        </div>
+        <button class="btn btn-block" type="submit">Notu kaydet</button>
+      </form>
+
+      <form method="post" action="/yonetim/basvuru/{{$a.ID}}/sil" class="form mt" data-confirm="Bu başvuru ve tüm belgeleri kalıcı olarak silinecek. Emin misiniz?">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <button class="btn btn-danger btn-block" type="submit">Başvuruyu sil</button>
+      </form>
+    </section>
+    {{end}}
+  </aside>
+</div>
+{{end}}

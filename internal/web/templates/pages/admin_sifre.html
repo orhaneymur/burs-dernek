@@ -1,0 +1,25 @@
+{{define "content"}}
+<div class="page-head"><h1>Şifre Değiştir</h1></div>
+<section class="card narrow-card">
+  {{if .User.MustChange}}
+  <div class="notice notice-warn"><strong>İlk giriş.</strong><p>Güvenlik için başlangıç şifrenizi değiştirin.</p></div>
+  {{end}}
+  <form method="post" action="/yonetim/sifre" class="form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="field">
+      <label for="mevcut">Mevcut Şifre</label>
+      <input id="mevcut" name="mevcut" type="password" autocomplete="current-password" required>
+    </div>
+    <div class="field">
+      <label for="yeni">Yeni Şifre</label>
+      <input id="yeni" name="yeni" type="password" minlength="10" autocomplete="new-password" required>
+      <p class="hint">En az 10 karakter.</p>
+    </div>
+    <div class="field">
+      <label for="tekrar">Yeni Şifre (tekrar)</label>
+      <input id="tekrar" name="tekrar" type="password" minlength="10" autocomplete="new-password" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Şifreyi güncelle</button>
+  </form>
+</section>
+{{end}}

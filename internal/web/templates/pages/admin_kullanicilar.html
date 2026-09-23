@@ -1,0 +1,68 @@
+{{define "content"}}
+<div class="page-head"><h1>Kullanıcılar</h1></div>
+
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Ad Soyad</th><th>Kullanıcı adı</th><th>Rol</th><th>Son giriş</th><th>Şifre sıfırla</th><th></th></tr></thead>
+  <tbody>
+    {{range .Data.Users}}
+    <tr>
+      <td><strong>{{.FullName}}</strong>{{if .Email}}<br><span class="muted small">{{.Email}}</span>{{end}}</td>
+      <td>{{.Username}}</td>
+      <td>{{if .IsAdmin}}<span class="badge badge-asil">Yönetici</span>{{else}}<span class="badge">Komisyon</span>{{end}}</td>
+      <td class="small">{{tarihSaat .LastLoginAt}}</td>
+      <td>
+        <form method="post" action="/yonetim/kullanici/{{.ID}}/sifre" class="inline-form">
+          <input type="hidden" name="csrf" value="{{$.CSRF}}">
+          <input type="password" name="password" placeholder="Yeni şifre" minlength="10" required>
+          <button class="btn btn-sm" type="submit">Ata</button>
+        </form>
+      </td>
+      <td>
+        {{if ne .ID $.User.ID}}
+        <form method="post" action="/yonetim/kullanici/{{.ID}}/sil" class="inline" data-confirm="{{.FullName}} kullanıcısı silinecek. Emin misiniz?">
+          <input type="hidden" name="csrf" value="{{$.CSRF}}">
+          <button class="link-button danger" type="submit">Sil</button>
+        </form>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+
+<section class="card">
+  <h2>Yeni Kullanıcı</h2>
+  <form method="post" action="/yonetim/kullanicilar" class="form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="grid-2">
+      <div class="field">
+        <label for="full_name">Ad Soyad</label>
+        <input id="full_name" name="full_name" required>
+      </div>
+      <div class="field">
+        <label for="username">Kullanıcı Adı</label>
+        <input id="username" name="username" minlength="3" required>
+      </div>
+      <div class="field">
+        <label for="email">E-posta</label>
+        <input id="email" name="email" type="email">
+      </div>
+      <div class="field">
+        <label for="role">Rol</label>
+        <select id="role" name="role">
+          <option value="komisyon">Komisyon üyesi (yalnızca başvuruları görüp puanlar)</option>
+          <option value="admin">Yönetici (tüm yetkiler)</option>
+        </select>
+      </div>
+      <div class="field span-2">
+        <label for="password">Şifre</label>
+        <input id="password" name="password" type="password" minlength="10" required>
+        <p class="hint">En az 10 karakter. Kullanıcıya iletip ilk girişte değiştirmesini isteyin.</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Kullanıcıyı ekle</button>
+  </form>
+</section>
+{{end}}

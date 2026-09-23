@@ -1,0 +1,55 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{.Title}} · Yönetim</title>
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+</head>
+<body class="admin">
+{{if .User}}
+<header class="admin-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/yonetim/">
+      <span class="brand-mark" aria-hidden="true">B</span>
+      <span class="brand-text"><strong>Burs Yönetimi</strong><small>{{.OrgName}}</small></span>
+    </a>
+    <nav class="admin-nav">
+      <a href="/yonetim/"{{if eq .Active "panel"}} class="active"{{end}}>Panel</a>
+      <a href="/yonetim/basvurular"{{if eq .Active "basvurular"}} class="active"{{end}}>Başvurular</a>
+      {{if .User.IsAdmin}}
+      <a href="/yonetim/siralama"{{if eq .Active "siralama"}} class="active"{{end}}>Sıralama</a>
+      <a href="/yonetim/donemler"{{if eq .Active "donemler"}} class="active"{{end}}>Dönemler</a>
+      <a href="/yonetim/kullanicilar"{{if eq .Active "kullanicilar"}} class="active"{{end}}>Kullanıcılar</a>
+      <a href="/yonetim/ayarlar"{{if eq .Active "ayarlar"}} class="active"{{end}}>Ayarlar</a>
+      <a href="/yonetim/kayitlar"{{if eq .Active "kayitlar"}} class="active"{{end}}>Kayıtlar</a>
+      {{end}}
+    </nav>
+    <div class="admin-user">
+      <span>{{.User.FullName}}{{if not .User.IsAdmin}} <small>(komisyon)</small>{{end}}</span>
+      <a href="/yonetim/sifre">Şifre</a>
+      <form method="post" action="/yonetim/cikis" class="inline">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <button class="link-button" type="submit">Çıkış</button>
+      </form>
+    </div>
+  </div>
+</header>
+{{end}}
+
+<main id="icerik" class="wrap admin-main">
+  {{with .Flash}}<div class="flash flash-{{.Kind}}" role="status">{{.Text}}</div>{{end}}
+  {{with index .Errors "genel"}}<div class="flash flash-hata" role="alert">{{.}}</div>{{end}}
+  {{template "content" .}}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p class="muted">{{.OrgName}} · Burs Yönetim Paneli · © {{.Year}}</p>
+  </div>
+</footer>
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>{{end}}

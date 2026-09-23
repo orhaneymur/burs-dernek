@@ -1,0 +1,80 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>Sıralama ve Kontenjan</h1>
+  {{if .Data.Period}}<a class="btn" href="/yonetim/disaaktar?donem={{.Data.Period.ID}}">CSV indir</a>{{end}}
+</div>
+
+{{if .Data.Periods}}
+<form method="get" action="/yonetim/siralama" class="inline-form mb">
+  <label for="donem">Dönem</label>
+  <select id="donem" name="donem" data-auto-submit>
+    {{range .Data.Periods}}<option value="{{.ID}}"{{if and $.Data.Period (eq $.Data.Period.ID .ID)}} selected{{end}}>{{.Name}}</option>{{end}}
+  </select>
+  <button class="btn btn-sm" type="submit">Göster</button>
+</form>
+{{end}}
+
+{{with .Data.Period}}
+<section class="card">
+  <h2>{{.Name}}</h2>
+  <p class="muted">Nihai puan = otomatik puan × %{{printf "%.0f" (mul .AutoWeight 100.0)}} + komisyon puanı × %{{printf "%.0f" (mul .CommitteeWeight 100.0)}}. Komisyon puanı girilmemiş başvurularda yalnızca otomatik puan kullanılır.</p>
+
+  <div class="row-buttons">
+    <form method="post" action="/yonetim/siralama/hesapla" class="inline">
+      <input type="hidden" name="csrf" value="{{$.CSRF}}">
+      <input type="hidden" name="donem" value="{{.ID}}">
+      <button class="btn" type="submit">Puanları yeniden hesapla</button>
+    </form>
+  </div>
+  <p class="hint">Kriterleri değiştirdiyseniz veya yeni değerlendirmeler yapıldıysa önce puanları yeniden hesaplayın.</p>
+
+  <form method="post" action="/yonetim/siralama/uygula" class="form mt"
+        data-confirm="Sıralamaya göre asil ve yedek listeleri yeniden işaretlenecek. Devam edilsin mi?">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}">
+    <input type="hidden" name="donem" value="{{.ID}}">
+    <div class="grid-2">
+      <div class="field">
+        <label for="kontenjan">Asil Kontenjan</label>
+        <input id="kontenjan" name="kontenjan" inputmode="numeric" value="{{.Quota}}">
+      </div>
+      <div class="field">
+        <label for="yedek">Yedek Kontenjan</label>
+        <input id="yedek" name="yedek" inputmode="numeric" value="{{.ReserveQuota}}">
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Kontenjanı uygula ve listeyi işaretle</button>
+    <p class="hint">"Değerlendirme dışı" işaretlenmiş başvurular listeye alınmaz. Sonuçları öğrencilere göstermek için dönemi "Sonuçlar ilan edildi" durumuna almanız gerekir.</p>
+  </form>
+</section>
+{{end}}
+
+{{if .Data.Apps}}
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Sıra</th><th>Öğrenci</th><th>Üniversite</th><th>Kişi başı gelir</th><th>GANO</th><th>Otomatik</th><th>Komisyon</th><th>Nihai</th><th>Durum</th></tr>
+  </thead>
+  <tbody>
+    {{$quota := .Data.Quota}}
+    {{$reserve := .Data.Reserve}}
+    {{range $i, $a := .Data.Apps}}
+    <tr class="{{if lt $i $quota}}row-asil{{else if lt $i (topla $quota $reserve)}}row-yedek{{end}}">
+      <td><strong>{{topla $i 1}}</strong></td>
+      <td><a href="/yonetim/basvuru/{{$a.ID}}">{{$a.FullName}}</a><br><span class="muted small">{{$a.TrackingCode}}</span></td>
+      <td class="small">{{$a.University}}</td>
+      <td>{{para $a.IncomePerCapita}} ₺</td>
+      <td>{{if $a.GPA}}{{printf "%.2f" $a.GPA}}{{else}}—{{end}}</td>
+      <td>{{puan $a.AutoScore}}</td>
+      <td>{{if $a.CommitteeScore}}{{puan $a.CommitteeScore}}{{else}}<span class="muted">—</span>{{end}}</td>
+      <td><strong>{{puan $a.FinalScore}}</strong></td>
+      <td>{{template "durum_rozeti" $a.Status}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+<p class="muted small">Yeşil satırlar kontenjan içinde, sarı satırlar yedek sınırındadır. Bu renkler yalnızca önizlemedir; kalıcı hâle gelmesi için "Kontenjanı uygula" düğmesini kullanın.</p>
+{{else}}
+<div class="card"><div class="notice"><strong>Bu dönemde değerlendirilecek başvuru yok.</strong></div></div>
+{{end}}
+{{end}}

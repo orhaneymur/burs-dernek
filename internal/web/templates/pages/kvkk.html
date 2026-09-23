@@ -1,0 +1,8 @@
+{{define "content"}}
+<section class="hero narrow">
+  <h1>KVKK Aydınlatma Metni</h1>
+</section>
+<section class="card">
+  <div class="kvkk-box open">{{range satirlar .Data.Text}}<p>{{.}}</p>{{end}}</div>
+</section>
+{{end}}

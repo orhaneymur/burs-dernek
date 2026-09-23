@@ -1,0 +1,34 @@
+{{define "content"}}
+<div class="page-head"><h1>Kurum Ayarları</h1></div>
+
+<form method="post" action="/yonetim/ayarlar" class="card form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="grid-2">
+    <div class="field">
+      <label for="org_name">Federasyon Adı</label>
+      <input id="org_name" name="org_name" value="{{.Data.OrgName}}" required>
+      <p class="hint">Sayfa başlıklarında ve alt bilgide gösterilir.</p>
+    </div>
+    <div class="field">
+      <label for="contact">İletişim E-postası</label>
+      <input id="contact" name="contact" type="email" value="{{.Data.Contact}}">
+    </div>
+    <div class="field">
+      <label for="phone">Telefon</label>
+      <input id="phone" name="phone" value="{{.Data.Phone}}">
+    </div>
+    <div class="field">
+      <label for="address">Adres</label>
+      <input id="address" name="address" value="{{.Data.Address}}">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="kvkk_text">KVKK Aydınlatma Metni</label>
+    <textarea id="kvkk_text" name="kvkk_text" rows="20">{{.Data.KVKKText}}</textarea>
+    <p class="hint">Başvuru sayfasında ve /kvkk adresinde gösterilir. Metni federasyonunuzun resmî unvanı ve iletişim bilgileriyle güncelleyin; hukuki sorumluluk kurumunuza aittir.</p>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Ayarları kaydet</button>
+</form>
+{{end}}

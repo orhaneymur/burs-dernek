@@ -1,0 +1,24 @@
+{{define "content"}}
+<div class="page-head"><h1>İşlem Kayıtları</h1></div>
+<p class="muted">Son 300 işlem. Belge görüntülemeleri, durum değişiklikleri ve giriş denemeleri burada tutulur.</p>
+
+<div class="table-wrap">
+<table class="table compact">
+  <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Kayıt</th><th>Ayrıntı</th><th>IP</th></tr></thead>
+  <tbody>
+    {{range .Data.Entries}}
+    <tr>
+      <td class="small">{{tarihSaat .CreatedAt}}</td>
+      <td>{{.Actor}}</td>
+      <td><code class="small">{{.Action}}</code></td>
+      <td class="small">{{.Entity}}{{if .EntityID}} #{{.EntityID}}{{end}}</td>
+      <td class="small">{{.Detail}}</td>
+      <td class="small muted">{{.IP}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="6" class="muted">Kayıt yok.</td></tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+{{end}}

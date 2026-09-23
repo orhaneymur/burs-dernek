@@ -1,0 +1,47 @@
+{{define "content"}}
+<div class="page-head">
+  <h1>Başvuru Dönemleri</h1>
+  <a class="btn btn-primary" href="/yonetim/donem/yeni">Yeni dönem</a>
+</div>
+
+{{if .Data.Periods}}
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr>
+      <th>Dönem</th><th>Tarihler</th><th>Kontenjan</th><th>Durum</th><th>Başvuru bağlantısı</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Data.Periods}}
+    <tr>
+      <td><strong>{{.Name}}</strong><br><span class="muted small">{{.Slug}}</span></td>
+      <td>{{tarihKisa .OpensAt}} – {{tarihKisa .ClosesAt}}</td>
+      <td>{{.Quota}} + {{.ReserveQuota}} yedek</td>
+      <td>
+        <form method="post" action="/yonetim/donem/{{.ID}}/durum" class="inline-form">
+          <input type="hidden" name="csrf" value="{{$.CSRF}}">
+          <select name="status" data-auto-submit>
+            <option value="taslak"{{if eq .Status "taslak"}} selected{{end}}>Taslak</option>
+            <option value="acik"{{if eq .Status "acik"}} selected{{end}}>Başvurulara açık</option>
+            <option value="kapali"{{if eq .Status "kapali"}} selected{{end}}>Başvurular kapalı</option>
+            <option value="ilan"{{if eq .Status "ilan"}} selected{{end}}>Sonuçlar ilan edildi</option>
+          </select>
+          <noscript><button class="btn btn-sm" type="submit">Kaydet</button></noscript>
+        </form>
+      </td>
+      <td><code class="small">{{$.Data.BaseURL}}/basvuru/{{.Slug}}</code></td>
+      <td class="actions">
+        <a href="/yonetim/donem/{{.ID}}">Düzenle</a>
+        <a href="/yonetim/donem/{{.ID}}/kriterler">Kriterler</a>
+        <a href="/yonetim/basvurular?donem={{.ID}}">Başvurular</a>
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+</div>
+{{else}}
+<div class="card"><div class="notice"><strong>Henüz dönem yok.</strong><p>İlk başvuru dönemini oluşturun.</p></div></div>
+{{end}}
+{{end}}

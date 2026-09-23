@@ -1,0 +1,50 @@
+# Yerel gelistirme ve deneme ortami.
+# Calistirmak icin:  docker compose up --build
+# Uygulama:          http://localhost:8080
+# Yonetim girisi:    http://localhost:8080/yonetim/giris  (admin / gelistirme-sifresi)
+
+services:
+  db:
+    image: mariadb:11.4
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: kok-sifresi
+      MARIADB_DATABASE: burs
+      MARIADB_USER: burs
+      MARIADB_PASSWORD: burs-sifresi
+      TZ: Europe/Istanbul
+    volumes:
+      - db-veri:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "13306:3306"   # yerel incelemeler icin
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_DSN: "burs:burs-sifresi@tcp(db:3306)/burs"
+      BASE_URL: "http://localhost:${PORT:-8080}"
+      SECRET_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      BOOTSTRAP_ADMIN_USER: "admin"
+      BOOTSTRAP_ADMIN_PASS: "gelistirme-sifresi"
+      TRUST_PROXY: "false"
+      MAX_UPLOAD_MB: "8"
+      TZ: Europe/Istanbul
+    ports:
+      - "${PORT:-8080}:8080"   # PORT=8090 docker compose up ile degistirilebilir
+    volumes:
+      - app-veri:/data
+      - /tmp
+
+volumes:
+  db-veri:
+  app-veri:

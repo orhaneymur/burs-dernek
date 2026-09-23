@@ -1,0 +1,67 @@
+{{define "content"}}
+<section class="hero narrow">
+  <h1>Başvuru sorgula</h1>
+  <p class="lead">Başvurunuzu gönderdiğinizde aldığınız takip kodu ile durumunuzu öğrenebilirsiniz.</p>
+</section>
+
+<section class="card narrow-card">
+  {{with index .Errors "genel"}}<div class="flash flash-hata" role="alert">{{.}}</div>{{end}}
+  <form method="post" action="/sorgula" class="form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="field">
+      <label for="tracking_code">Takip Kodu</label>
+      <input id="tracking_code" name="tracking_code" placeholder="LF-XXXX-XXXX" value="{{index .FormVals "tracking_code"}}" required>
+    </div>
+    <div class="field">
+      <label for="birth_date">Doğum Tarihi</label>
+      <input id="birth_date" name="birth_date" type="date" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Sorgula</button>
+  </form>
+</section>
+
+{{with .Data.App}}
+<section class="card">
+  <h2>Başvuru Durumu</h2>
+  <dl class="summary">
+    <div><dt>Takip Kodu</dt><dd><strong>{{.TrackingCode}}</strong></dd></div>
+    <div><dt>Ad Soyad</dt><dd>{{.FullName}}</dd></div>
+    <div><dt>Başvuru Tarihi</dt><dd>{{tarihSaat .SubmittedAt}}</dd></div>
+    <div><dt>Durum</dt><dd>
+      {{if $.Data.Announced}}
+        {{template "durum_rozeti" .Status}}
+      {{else}}
+        {{if eq .Status "taslak"}}<span class="badge">Tamamlanmadı</span>{{else}}<span class="badge badge-basvuruldu">Değerlendirme sürüyor</span>{{end}}
+      {{end}}
+    </dd></div>
+  </dl>
+
+  {{if $.Data.Announced}}
+    {{if eq .Status "asil"}}
+      <div class="notice notice-ok"><strong>Tebrikler, bursa hak kazandınız.</strong>
+      <p>Federasyonumuz sizinle iletişime geçecektir. Sorularınız için {{$.Contact}} adresine yazabilirsiniz.</p></div>
+    {{else if eq .Status "yedek"}}
+      <div class="notice"><strong>Yedek listedesiniz.</strong>
+      <p>Asil listeden boşalma olması hâlinde sizinle iletişime geçilecektir.</p></div>
+    {{else if eq .Status "red"}}
+      <div class="notice notice-warn"><strong>Başvurunuz değerlendirme dışı bırakıldı.</strong>
+      <p>Ayrıntılı bilgi için {{$.Contact}} adresine yazabilirsiniz.</p></div>
+    {{else}}
+      <div class="notice"><strong>Bu dönem burs kontenjanına giremediniz.</strong>
+      <p>İlginiz için teşekkür ederiz; bir sonraki dönemde tekrar başvurabilirsiniz.</p></div>
+    {{end}}
+    {{with $.Data.Period}}{{if .ResultNote}}<p>{{.ResultNote}}</p>{{end}}{{end}}
+  {{else if eq .Status "taslak"}}
+    <div class="notice notice-warn">
+      <strong>Bu başvuru henüz gönderilmemiş.</strong>
+      <p><a href="/devam">Başvuruma devam et</a> sayfasından formu tamamlayabilirsiniz.</p>
+    </div>
+  {{else}}
+    <div class="notice">
+      <strong>Başvurunuz değerlendirme aşamasında.</strong>
+      <p>Sonuçlar ilan edildiğinde bu sayfadan öğrenebilirsiniz.</p>
+    </div>
+  {{end}}
+</section>
+{{end}}
+{{end}}
