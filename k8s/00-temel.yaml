@@ -1,30 +1,20 @@
-# Namespace, gizli bilgiler ve kalici disk alanlari
+# Namespace ve kalici disk alanlari
+#
+# Gizli bilgiler bu dosyada TUTULMAZ. Secret'i kurulumda tek seferlik olarak
+# uretip uygulayin (bkz. README "Gizli degerleri uretin"):
+#
+#   kubectl -n burs create secret generic burs-gizli \
+#     --from-literal=DATABASE_DSN="burs:<db-sifresi>@tcp(burs-mariadb:3306)/burs" \
+#     --from-literal=SECRET_KEY="$(openssl rand -hex 32)" \
+#     --from-literal=BOOTSTRAP_ADMIN_USER="admin" \
+#     --from-literal=BOOTSTRAP_ADMIN_PASS="<ilk-sifre>" \
+#     --from-literal=MARIADB_ROOT_PASSWORD="<root-sifresi>" \
+#     --from-literal=MARIADB_PASSWORD="<db-sifresi>"
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: burs
----
-# ÖNEMLİ: Bu dosyadaki değerler örnektir. Uygulamadan önce değiştirin:
-#   SECRET_KEY üretmek için:  openssl rand -hex 32
-#   Şifreler için:            openssl rand -base64 24
-apiVersion: v1
-kind: Secret
-metadata:
-  name: burs-gizli
-  namespace: burs
-type: Opaque
-stringData:
-  # Uygulamanın veritabanı bağlantısı (kullanıcı:şifre@tcp(sunucu:3306)/veritabani)
-  DATABASE_DSN: "burs:DEGISTIRIN_DB_SIFRESI@tcp(burs-mariadb:3306)/burs"
-  # T.C. kimlik numarası şifrelemesi ve çerez imzalama anahtarı (64 haneli hex)
-  SECRET_KEY: "DEGISTIRIN_64_HANELI_HEX_ANAHTAR"
-  # İlk yönetici hesabı (ilk açılışta oluşturulur, sonra panelden değiştirin)
-  BOOTSTRAP_ADMIN_USER: "admin"
-  BOOTSTRAP_ADMIN_PASS: "DEGISTIRIN_ILK_SIFRE"
-  # MariaDB kök ve uygulama şifreleri
-  MARIADB_ROOT_PASSWORD: "DEGISTIRIN_ROOT_SIFRESI"
-  MARIADB_PASSWORD: "DEGISTIRIN_DB_SIFRESI"
 ---
 # Yüklenen belgelerin ve şifreleme anahtarının tutulduğu disk
 apiVersion: v1
@@ -37,6 +27,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  # storageClassName belirtilmedi: kümenin varsayılanı kullanılır (k3s'te local-path)
 ---
 # Veritabanı diski
 apiVersion: v1

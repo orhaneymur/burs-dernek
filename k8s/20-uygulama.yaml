@@ -28,7 +28,9 @@ spec:
           type: RuntimeDefault
       containers:
         - name: burs
-          image: ghcr.io/DEGISTIRIN/lafed-burs:1.0.0   # kendi imaj adresinizle degistirin
+          # Imaj sunucuda uretilip k3s containerd deposuna aktarilir (bkz. README).
+          # Harici bir kayit defteri kullanacaksaniz tam adresi buraya yazin.
+          image: lafed-burs:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -110,14 +112,13 @@ metadata:
   name: burs
   namespace: burs
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod    # cert-manager kurulu degilse bu satiri silin
-    nginx.ingress.kubernetes.io/proxy-body-size: "16m"  # belge yuklemeleri icin
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Traefik (k3s varsayilani). TLS, Cloudflare tarafinda sonlanir; kume
+    # icinde yalnizca 80 dinlenir. Cloudflare'i "Full (strict)" moduna
+    # alacaksaniz burada bir sertifika (cert-manager veya Cloudflare Origin CA)
+    # tanimlayip tls bolumunu eklemeniz gerekir.
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts: [burs.lafed.org.tr]
-      secretName: burs-tls
+  ingressClassName: traefik
   rules:
     - host: burs.lafed.org.tr
       http:
