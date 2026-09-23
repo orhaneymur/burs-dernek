@@ -3,7 +3,7 @@
 Üniversite öğrencilerinden çevrim içi burs başvurusu toplayan, başvuruları ölçütlere göre
 otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten hafif bir web uygulaması.
 
-**Yayın adresi:** `https://burs.lafed.org.tr` · **Çalışma ortamı:** Kubernetes (Linux)
+**Canlı:** <https://burs.lafed.org.tr> · **Sunucu:** 116.203.80.86 (k3s, `burs` namespace) · **Depo:** <https://github.com/orhaneymur/burs-dernek>
 
 | | |
 |---|---|
@@ -79,67 +79,104 @@ BASE=http://localhost:8080 ./scripts/duman-testi.sh
 
 ## Kubernetes'e kurulum
 
-### 1. İmajı derleyip kayıt defterine gönderin
+Sistem `116.203.80.86` sunucusunda **k3s** üzerinde, `burs` namespace'inde çalışmaktadır.
+Ingress **Traefik**, depolama **local-path**, TLS **Cloudflare** tarafında sonlanır.
+Aşağıdaki adımlar bu kurulumun birebir tekrarıdır.
+
+### 1. Depoyu sunucuya alın
 
 ```bash
-make imaj gonder IMAGE=ghcr.io/<kullanici>/lafed-burs TAG=1.0.0
+cd /opt && git clone https://github.com/orhaneymur/burs-dernek.git
+cd burs-dernek
 ```
 
-`k8s/20-uygulama.yaml` içindeki `image:` satırını bu adresle güncelleyin.
+### 2. İmajı üretip küme deposuna aktarın
 
-### 2. Gizli bilgileri hazırlayın
-
-`k8s/00-temel.yaml` içindeki **tüm** `DEGISTIRIN_*` değerlerini gerçek değerlerle doldurun:
+Harici bir kayıt defteri gerekmez; imaj sunucuda üretilip k3s'in containerd deposuna aktarılır:
 
 ```bash
-openssl rand -hex 32      # SECRET_KEY (64 haneli hex)
-openssl rand -base64 24   # veritabanı ve yönetici şifreleri
+docker build -t lafed-burs:1.0.0 .
+docker save lafed-burs:1.0.0 | k3s ctr images import -
+```
+
+> Sunucuda Docker Hub oturumu süresi dolmuşsa `docker logout` ile anonim çekime geçin.
+
+### 3. Namespace ve diskleri oluşturun
+
+```bash
+kubectl apply -f k8s/00-temel.yaml
+```
+
+### 4. Gizli değerleri üretin
+
+Gerçek şifreler depoda tutulmaz; tek seferlik üretilip Secret'a yazılır:
+
+```bash
+DB_SIFRE=$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-24)
+ROOT_SIFRE=$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-24)
+ADMIN_SIFRE=$(openssl rand -base64 18 | tr -d '/+=' | cut -c1-16)
+
+kubectl -n burs create secret generic burs-gizli   --from-literal=DATABASE_DSN="burs:${DB_SIFRE}@tcp(burs-mariadb:3306)/burs"   --from-literal=SECRET_KEY="$(openssl rand -hex 32)"   --from-literal=BOOTSTRAP_ADMIN_USER="admin"   --from-literal=BOOTSTRAP_ADMIN_PASS="${ADMIN_SIFRE}"   --from-literal=MARIADB_ROOT_PASSWORD="${ROOT_SIFRE}"   --from-literal=MARIADB_PASSWORD="${DB_SIFRE}"
+
+echo "İlk yönetici şifresi: ${ADMIN_SIFRE}"
 ```
 
 > `SECRET_KEY` T.C. kimlik numaralarını şifreler. **Kaybederseniz kayıtlı T.C. numaraları
-> çözülemez.** Anahtarı güvenli bir yerde ayrıca saklayın ve sonradan değiştirmeyin.
+> çözülemez.** Kümeden ayrıca yedekleyin:
+> `kubectl -n burs get secret burs-gizli -o jsonpath='{.data.SECRET_KEY}' | base64 -d`
 
-Bu dosyayı sürüm denetimine gizli değerlerle göndermeyin; tercihen `kubectl create secret`
-veya SealedSecrets/SOPS kullanın.
-
-### 3. Uygulayın
+### 5. Bileşenleri kurun
 
 ```bash
-kubectl apply -f k8s/00-temel.yaml     # namespace, secret, diskler
-kubectl apply -f k8s/10-mariadb.yaml   # (sunucunuzda MySQL varsa atlayın)
-kubectl apply -f k8s/20-uygulama.yaml  # deployment + service + ingress
-kubectl apply -f k8s/30-yedekleme.yaml # günlük yedek
+kubectl apply -f k8s/10-mariadb.yaml    # sunucunuzda MySQL varsa atlayın
+kubectl apply -f k8s/20-uygulama.yaml
+kubectl apply -f k8s/30-yedekleme.yaml
+kubectl -n burs rollout status deploy/burs
 ```
 
-veya kısaca `make dagit`.
+### 6. Cloudflare ve ingress
 
-Şema geçişleri (migration) uygulama açılışında kendiliğinden uygulanır; ayrı bir adım yoktur.
+Cloudflare proxy'si origin'e **443** üzerinden bağlanır. Bu yüzden ingress'te
+`traefik.ingress.kubernetes.io/router.entrypoints` **tanımlanmaz** — Traefik router'ı
+hem `web` (80) hem `websecure` (443) entrypoint'inde oluşturur; aksi hâlde Cloudflare
+üzerinden 404 alınır.
 
-### 4. DNS ve sertifika
-
-- `burs.lafed.org.tr` A kaydını ingress denetleyicinizin IP adresine yönlendirin
-- cert-manager kuruluysa `letsencrypt-prod` ClusterIssuer'ı ile sertifika otomatik alınır
-- cert-manager yoksa `cert-manager.io/cluster-issuer` satırını silip kendi TLS gizli anahtarınızı
-  `burs-tls` adıyla oluşturun
-
-### 5. Doğrulayın
+Doğrulama:
 
 ```bash
-make durum                       # pod, servis, ingress, disk durumu
-make gunluk                      # canlı günlükler
-curl -sI https://burs.lafed.org.tr/saglik
+curl -H 'Host: burs.lafed.org.tr' http://127.0.0.1/saglik      # origin 80
+curl -k -H 'Host: burs.lafed.org.tr' https://127.0.0.1/saglik  # origin 443
+curl https://burs.lafed.org.tr/saglik                          # Cloudflare üzerinden
 ```
+
+Cloudflare'ı **Full (strict)** moduna alacaksanız origin'e geçerli bir sertifika gerekir
+(cert-manager veya Cloudflare Origin CA) ve ingress'e `tls:` bölümü eklenmelidir.
+
+### 7. Canlı doğrulama
+
+```bash
+BASE=https://burs.lafed.org.tr ADMIN_USER=admin ADMIN_PASS='<sifre>' ./scripts/duman-testi.sh
+```
+
+Test bir deneme dönemi ve başvurusu oluşturur; sonrasında temizlemeyi unutmayın:
+
+```sql
+DELETE FROM periods WHERE slug LIKE 'test-%';
+```
+
+### Yeni sürüm yayınlama
+
+```bash
+ssh root@116.203.80.86 '/opt/burs-dernek/scripts/sunucu-guncelle.sh'
+```
+
+Betik depoyu günceller, imajı yeniden üretir, k3s'e aktarır, `deploy/burs`'u yeni imaja
+geçirir, sağlık kontrolü yapar ve eski imajları temizler.
 
 ### Mevcut bir MySQL sunucusunu kullanmak
 
-`k8s/10-mariadb.yaml` dosyasını uygulamayın ve `DATABASE_DSN` değerini kendi sunucunuza
-yönlendirin:
-
-```
-kullanici:sifre@tcp(10.0.0.5:3306)/burs
-```
-
-Veritabanı `utf8mb4` / `utf8mb4_unicode_ci` olmalıdır:
+`k8s/10-mariadb.yaml` dosyasını uygulamayın ve Secret'taki `DATABASE_DSN` değerini kendi
+sunucunuza yönlendirin. Veritabanı `utf8mb4` / `utf8mb4_unicode_ci` olmalıdır:
 
 ```sql
 CREATE DATABASE burs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -150,10 +187,8 @@ GRANT ALL PRIVILEGES ON burs.* TO 'burs'@'%';
 ### Neden tek kopya (replica: 1)?
 
 Yüklenen belgeler `ReadWriteOnce` bir disk üzerinde tutulur ve hız limiti bellekte çalışır.
-Birkaç bin başvuru için tek kopya fazlasıyla yeterlidir (uygulama ~10 MB bellek kullanır).
-Yatay ölçekleme gerekirse belgelerin S3/MinIO'ya taşınması gerekir.
-
----
+Birkaç bin başvuru için tek kopya fazlasıyla yeterlidir (uygulama canlıda ~5 MB bellek
+kullanıyor). Yatay ölçekleme gerekirse belgelerin S3/MinIO'ya taşınması gerekir.
 
 ## İlk ayarlar
 
