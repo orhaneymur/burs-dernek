@@ -75,13 +75,21 @@ fi
 
 printf '%%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%%%EOF\n' > "$TMP/transkript.pdf"
 
+# Turkce karakterler kabuk kodlamasindan etkilenmesin diye UTF-8 dosyadan gonderilir
+printf 'Ay\xc5\x9fe G\xc3\xbcl\xc5\x9fah' > "$TMP/ad.txt"
+printf '\xc3\x87if\xc3\xa7io\xc4\x9flu' > "$TMP/soyad.txt"
+printf 'K\xc4\xb1rklareli' > "$TMP/il.txt"
+printf '\xc4\xb0stanbul Teknik \xc3\x9cniversitesi' > "$TMP/uni.txt"
+printf '\xc5\x9eehir ve B\xc3\xb6lge Planlama' > "$TMP/bolum.txt"
+
 gonder() { # gonder <ek-alanlar...>  -> HTTP kodu
   curl -s -o "$TMP/govde.html" -w '%{http_code}' -b "$OGRENCI" -c "$OGRENCI" \
     -F "csrf=$(csrf "$OGRENCI")" \
-    -F "national_id=${TC:-10000000146}" -F "first_name=Ayse" -F "last_name=Yilmaz" \
+    -F "national_id=${TC:-10000000146}" \
+    -F "first_name=<$(yol "$TMP/ad.txt")" -F "last_name=<$(yol "$TMP/soyad.txt")" \
     -F "birth_date=2004-05-10" -F "gender=kadin" -F "phone=5551112233" \
-    -F "email=ayse@example.com" -F "city=Kirklareli" -F "district=Luleburgaz" \
-    -F "university=Trakya Universitesi" -F "department=Bilgisayar Muhendisligi" \
+    -F "email=ayse@example.com" -F "city=<$(yol "$TMP/il.txt")" -F "district=Luleburgaz" \
+    -F "university=<$(yol "$TMP/uni.txt")" -F "department=<$(yol "$TMP/bolum.txt")" \
     -F "class_year=3" -F "gpa=3,20" -F "gpa_scale=4" \
     -F "household_income=24000" -F "household_size=4" -F "housing_type=kira" \
     -F "father_status=calismiyor" -F "mother_status=calismiyor" \
@@ -96,7 +104,7 @@ echo "== 5. Dogrulama kurallari"
 kod=$(TC=11111111111 gonder -F "kvkk=on" -F "beyan=on" -F "transkript=@$(yol "$TMP/transkript.pdf");type=application/pdf")
 kontrol "gecersiz T.C. reddedilir" "400" "$kod"
 var_mi "T.C. hata mesaji gosterilir" "Geçerli bir T.C."
-var_mi "girilen degerler korunur" "Trakya Universitesi"
+var_mi "girilen degerler korunur (Turkce)" "Teknik Üniversitesi"
 
 kod=$(gonder -F "beyan=on" -F "transkript=@$(yol "$TMP/transkript.pdf");type=application/pdf")
 kontrol "KVKK onayi olmadan reddedilir" "400" "$kod"
@@ -130,6 +138,7 @@ if [ -n "$ID" ]; then kontrol "listede basvuru var (#$ID)" "var" "var"; else kon
 kod=$(durum "$YONETIM" "/yonetim/basvuru/$ID")
 kontrol "basvuru detayi" "200" "$kod"
 var_mi "puan kirilimi gosteriliyor" "Kriter Kırılımı"
+var_mi "Turkce karakterler dogru kaydedildi" "Çifçioğlu"
 DONEM_ID=$(grep -o 'donem=[0-9]\+' "$TMP/govde.html" | head -1 | grep -o '[0-9]\+')
 BELGE_ID=$(grep -o '/yonetim/belge/[0-9]\+' "$TMP/govde.html" | head -1 | grep -o '[0-9]\+')
 

@@ -25,7 +25,7 @@
   </div>
   {{end}}
 
-  <form method="post" action="/basvuru/{{$p.Slug}}" enctype="multipart/form-data" class="form-layout" novalidate>
+  <form method="post" action="/basvuru/{{$p.Slug}}" enctype="multipart/form-data" class="form-layout" accept-charset="UTF-8" novalidate>
     <input type="hidden" name="csrf" value="{{.CSRF}}">
     <div class="hp" aria-hidden="true"><label>Web siteniz<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 

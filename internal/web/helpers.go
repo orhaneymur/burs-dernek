@@ -135,8 +135,10 @@ func thousands(n int) string {
 
 // ---------------------------------------------------------------- Form okuma
 
+// fstr form alanini okur. Gecerli olmayan UTF-8 baytlari temizlenir:
+// aksi halde utf8mb4 kolonlara yazarken veritabani hatasi olusur.
 func fstr(r *http.Request, name string) string {
-	return strings.TrimSpace(r.FormValue(name))
+	return strings.ToValidUTF8(strings.TrimSpace(r.FormValue(name)), "")
 }
 
 func fint(r *http.Request, name string) int {
@@ -202,6 +204,7 @@ func oneOf(value string, opts []model.Option) string {
 }
 
 func clip(s string, max int) string {
+	s = strings.ToValidUTF8(s, "")
 	r := []rune(s)
 	if len(r) <= max {
 		return s
