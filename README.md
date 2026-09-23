@@ -11,7 +11,7 @@ otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten ha
 | Veritabanı | MariaDB / MySQL |
 | Ön yüz | Sunucu taraflı HTML + tek CSS dosyası; JavaScript olmadan da tam çalışır |
 | Docker imajı | **12,9 MB** (`scratch` tabanlı tek statik binary) |
-| Çalışma anı bellek | **~10 MB** (uygulama), ~90 MB (MariaDB) |
+| Çalışma anı bellek | **~5 MB** (uygulama), ~85 MB (MariaDB) — canlı ölçüm |
 | Dış bağımlılık | Yalnızca MySQL sürücüsü ve `bcrypt` |
 
 ---
