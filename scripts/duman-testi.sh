@@ -122,8 +122,12 @@ kod=$(gonder -F "kvkk=on" -F "beyan=on" -F "transkript=@$(yol "$TMP/transkript.p
 kontrol "POST /basvuru/$SLUG" "303" "$kod"
 
 curl -s -b "$OGRENCI" -c "$OGRENCI" "$BASE/basvurunuz-alindi" > "$TMP/tamam.html"
-TAKIP=$(grep -o 'LF-[A-Z0-9]\{4\}-[A-Z0-9]\{4\}' "$TMP/tamam.html" | head -1)
-if [ -n "$TAKIP" ]; then kontrol "basvuru numarasi verildi ($TAKIP)" "var" "var"; else kontrol "basvuru numarasi verildi" "var" "yok"; fi
+var_mi "onay ekrani gosteriliyor" "Başvurunuz alındı" "$TMP/tamam.html"
+if grep -q 'LF-[A-Z0-9]\{4\}-[A-Z0-9]\{4\}' "$TMP/tamam.html"; then
+  kontrol "ogrenciye referans numarasi gosterilmiyor" "yok" "var"
+else
+  kontrol "ogrenciye referans numarasi gosterilmiyor" "yok" "yok"
+fi
 
 kod=$(gonder -F "kvkk=on" -F "beyan=on" -F "transkript=@$(yol "$TMP/transkript.pdf");type=application/pdf")
 kontrol "ayni T.C. ile ikinci basvuru engellenir" "400" "$kod"

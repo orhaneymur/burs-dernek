@@ -54,18 +54,4 @@
     hesapla();
   }
 
-  // Takip kodunu panoya kopyalama.
-  var kod = document.querySelector('.tracking-code');
-  if (kod && navigator.clipboard) {
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn btn-sm';
-    btn.textContent = 'Kodu kopyala';
-    btn.addEventListener('click', function () {
-      navigator.clipboard.writeText(kod.textContent.trim()).then(function () {
-        btn.textContent = 'Kopyalandı ✓';
-      });
-    });
-    kod.parentNode.appendChild(btn);
-  }
 })();

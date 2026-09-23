@@ -38,7 +38,8 @@ otomatik puanlayan ve burs komisyonunun değerlendirmesiyle sıralama üreten ha
 - **Tek sayfalık** başvuru formu; 7 başlık altında gruplanmış, tek gönderimde tamamlanır
 - İstenen tek belge **transkript** (PDF/JPG/PNG, içerik imzasından tür doğrulaması);
   hazırlık ve 1. sınıf öğrencilerinden istenmez
-- Gönderimde **başvuru numarası** (`LF-XXXX-XXXX`) verilir
+- Gönderim sonrası öğrenciye onay ekranı gösterilir; sistem içeride bir referans numarası
+  (`LF-XXXX-XXXX`) üretir, bu numara yalnızca yönetim panelinde ve CSV'de görünür
 - Aynı dönemde aynı T.C. ile ikinci başvuru engellenir
 - KVKK aydınlatma metni ve açık rıza onayı, onay zamanı kayıt altında
 

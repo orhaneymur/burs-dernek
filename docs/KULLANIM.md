@@ -110,6 +110,7 @@ Noktalı virgül*.
 | "Başvurumu gönderdim, düzeltebilir miyim?" | Gönderilen başvuru kilitlenir. Gerekirse yönetici başvuruyu silip öğrenciden yeniden başvurmasını isteyebilir. |
 | "Aynı kişi iki kez başvurabilir mi?" | Hayır; aynı dönemde aynı T.C. kimlik numarasıyla ikinci başvuru sistem tarafından engellenir. |
 | "Sonucumu nereden öğreneceğim?" | Sonuçlar federasyon tarafından öğrencilere bildirilir. Sistemde sorgulama ekranı yoktur. |
+| "Başvurumun ulaştığını nasıl bileceğim?" | Gönderim sonrası ekranda onay mesajı çıkar. Öğrenciye numara verilmez; siz başvuruyu adıyla veya T.C. ile panelden bulursunuz. |
 
 ---
 

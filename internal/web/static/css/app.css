@@ -285,12 +285,6 @@ fieldset { border: 1px solid var(--line); border-radius: var(--r); padding: 16px
   width: 68px; height: 68px; border-radius: 50%; background: var(--ok-bg); color: var(--ok);
   display: grid; place-items: center; font-size: 2rem; margin: 0 auto 16px;
 }
-.tracking { background: var(--info-bg); border-radius: var(--r); padding: 22px; margin: 22px 0 28px; }
-.tracking-code {
-  display: block; font-size: clamp(1.7rem, 1.2rem + 2vw, 2.4rem); letter-spacing: .12em;
-  color: var(--brand); margin: 6px 0 10px; font-variant-numeric: tabular-nums;
-}
-
 /* ------------------------------------------------------------ Tablolar */
 
 .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); margin-bottom: 20px; box-shadow: var(--shadow-sm); }

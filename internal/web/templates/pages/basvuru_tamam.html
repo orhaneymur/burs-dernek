@@ -4,13 +4,8 @@
   <section class="card success-card">
     <div class="big-check" aria-hidden="true">✓</div>
     <h1>Başvurunuz alındı</h1>
-    <p class="lead">Sayın {{$a.FullName}}, burs başvurunuz {{tarihSaat $a.SubmittedAt}} itibarıyla kaydedildi.</p>
-
-    <div class="tracking">
-      <span class="muted small">Başvuru numaranız</span>
-      <strong class="tracking-code">{{$a.TrackingCode}}</strong>
-      <p class="muted small">Federasyonla yazışmalarınızda bu numarayı belirtin.</p>
-    </div>
+    <p class="lead">Sayın {{$a.FullName}}, burs başvurunuz {{tarihSaat $a.SubmittedAt}} itibarıyla federasyonumuza ulaştı.</p>
+    <p class="muted">Ayrıca bir işlem yapmanıza gerek yok.</p>
 
     <h2>Bundan sonra ne olacak?</h2>
     <ol class="steps">
