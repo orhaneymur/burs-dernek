@@ -111,12 +111,11 @@ kind: Ingress
 metadata:
   name: burs
   namespace: burs
-  annotations:
-    # Traefik (k3s varsayilani). TLS, Cloudflare tarafinda sonlanir; kume
-    # icinde yalnizca 80 dinlenir. Cloudflare'i "Full (strict)" moduna
-    # alacaksaniz burada bir sertifika (cert-manager veya Cloudflare Origin CA)
-    # tanimlayip tls bolumunu eklemeniz gerekir.
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+  # Traefik (k3s varsayilani) icin entrypoint kisitlamasi TANIMLANMAZ:
+  # boylece hem 80 (web) hem 443 (websecure) uzerinden yonlendirme calisir.
+  # Cloudflare proxy'si origin'e 443 ile baglandigi icin bu gereklidir;
+  # websecure entrypoint'i Traefik'in varsayilan sertifikasini sunar ve
+  # TLS son kullaniciya Cloudflare tarafindan verilir.
 spec:
   ingressClassName: traefik
   rules:
