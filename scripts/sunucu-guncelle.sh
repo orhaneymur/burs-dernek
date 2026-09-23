@@ -32,7 +32,14 @@ kubectl -n "$AD" set image deploy/burs "burs=$IMAJ"
 kubectl -n "$AD" rollout status deploy/burs --timeout=180s
 
 echo "== Saglik kontrolu"
-curl -s -o /dev/null -w "ingress -> %{http_code}\n" -H "Host: burs.lafed.org.tr" http://127.0.0.1/saglik
+# Ingress yeni pod'u fark edene kadar kisa bir sure yeniden denenir
+KOD=""
+for _ in 1 2 3 4 5 6; do
+  KOD=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: burs.lafed.org.tr" http://127.0.0.1/saglik || true)
+  [ "$KOD" = "200" ] && break
+  sleep 3
+done
+echo "ingress -> $KOD"
 
 echo "== Eski imajlar temizleniyor (son 3 surum korunur)"
 docker images lafed-burs --format '{{.Repository}}:{{.Tag}} {{.CreatedAt}}' \
