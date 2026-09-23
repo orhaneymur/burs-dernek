@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light dark">
 <title>{{.Title}} · {{.OrgName}}</title>
-<link rel="stylesheet" href="/static/css/app.css">
+<link rel="stylesheet" href="/static/css/app.css?v={{.AssetVer}}">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -44,6 +44,6 @@
     </div>
   </div>
 </footer>
-<script src="/static/js/app.js" defer></script>
+<script src="/static/js/app.js?v={{.AssetVer}}" defer></script>
 </body>
 </html>{{end}}

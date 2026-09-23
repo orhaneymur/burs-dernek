@@ -2,12 +2,15 @@
 package web
 
 import (
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,6 +32,11 @@ type Server struct {
 	keys *security.Keyring
 	tpl  map[string]*template.Template
 
+	// assetVer statik dosyalarin icerigine bagli kisa damgadir; CSS/JS
+	// adreslerine eklenir ve yeni surumde ara onbellekleri (Cloudflare,
+	// tarayici) kendiliginden gecersiz kilar.
+	assetVer string
+
 	formLimit   *security.Limiter
 	loginLimit  *security.Limiter
 	uploadLimit *security.Limiter
@@ -43,10 +51,32 @@ func New(cfg *config.Config, st *store.Store, keys *security.Keyring) (*Server, 
 		loginLimit:  security.NewLimiter(10, 15*time.Minute),
 		uploadLimit: security.NewLimiter(60, time.Hour),
 	}
+	s.assetVer = assetVersion()
 	if err := s.loadTemplates(); err != nil {
 		return nil, err
 	}
 	return s, nil
+}
+
+// assetVersion gomulu statik dosyalarin ozetinden kisa bir damga uretir.
+func assetVersion() string {
+	h := sha256.New()
+	err := fs.WalkDir(staticFS, "static", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		b, err := staticFS.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		h.Write([]byte(path))
+		h.Write(b)
+		return nil
+	})
+	if err != nil {
+		return strconv.FormatInt(time.Now().Unix(), 36)
+	}
+	return hex.EncodeToString(h.Sum(nil))[:10]
 }
 
 func (s *Server) loadTemplates() error {
@@ -143,6 +173,7 @@ type pageData struct {
 	Flash    *flash
 	CSRF     string
 	BaseURL  string
+	AssetVer string
 	Year     int
 	OrgName  string
 	Contact  string
@@ -156,8 +187,9 @@ func (s *Server) newPage(w http.ResponseWriter, r *http.Request, title string) *
 	p := &pageData{
 		Title:   title,
 		CSRF:    s.csrfToken(w, r),
-		BaseURL: s.cfg.BaseURL,
-		Year:    time.Now().Year(),
+		BaseURL:  s.cfg.BaseURL,
+		AssetVer: s.assetVer,
+		Year:     time.Now().Year(),
 		OrgName: s.st.Setting(ctx, "org_name", "LAFED Federasyonu"),
 		Contact: s.st.Setting(ctx, "contact", "burs@lafed.org.tr"),
 		Data:     map[string]any{},
@@ -203,7 +235,12 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func cacheStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "public, max-age=86400")
+		if r.URL.Query().Get("v") != "" {
+			// Adres icerige bagli; guvenle uzun sure saklanabilir
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			w.Header().Set("Cache-Control", "public, max-age=300")
+		}
 		next.ServeHTTP(w, r)
 	})
 }

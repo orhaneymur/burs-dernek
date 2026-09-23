@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>{{.Title}} · Yönetim</title>
-<link rel="stylesheet" href="/static/css/app.css">
+<link rel="stylesheet" href="/static/css/app.css?v={{.AssetVer}}">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 </head>
 <body class="admin">
@@ -50,6 +50,6 @@
     <p class="muted">{{.OrgName}} · Burs Yönetim Paneli · © {{.Year}}</p>
   </div>
 </footer>
-<script src="/static/js/app.js" defer></script>
+<script src="/static/js/app.js?v={{.AssetVer}}" defer></script>
 </body>
 </html>{{end}}
